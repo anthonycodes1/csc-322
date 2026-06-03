@@ -171,7 +171,6 @@
   .info-box li { margin-bottom:3px; }
   .info-box code { background:rgba(37,99,235,.12); padding:1px 5px; border-radius:4px; font-family:'DM Mono',monospace; font-size:11px; }
 
-  /* sheet format example table */
   .format-table { width:100%; border-collapse:collapse; margin-top:10px; font-size:12px; }
   .format-table th { background:var(--bg); padding:6px 10px; text-align:left; font-weight:600; color:var(--muted); border:1px solid var(--border); letter-spacing:.04em; text-transform:uppercase; font-size:10px; }
   .format-table td { padding:6px 10px; border:1px solid var(--border); color:var(--text-2); font-family:'DM Mono',monospace; }
@@ -184,6 +183,13 @@
   .toast.info { background:var(--accent); }
   .toast.warning { background:var(--amber); }
 
+  /* Loading overlay */
+  #loading-overlay { position:fixed; inset:0; background:rgba(244,245,247,.92); z-index:500; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; }
+  #loading-overlay.hidden { display:none; }
+  .spinner { width:36px; height:36px; border:3px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin .7s linear infinite; }
+  @keyframes spin { to{transform:rotate(360deg)} }
+  .loading-text { font-size:13px; color:var(--muted); font-weight:500; }
+
   @media(max-width:640px) {
     .page-header { padding:1.1rem 1rem; }
     main { padding:0 1rem 4rem; }
@@ -195,6 +201,12 @@
 </head>
 <body>
 
+<!-- Loading overlay shown while fetching sheet -->
+<div id="loading-overlay">
+  <div class="spinner"></div>
+  <div class="loading-text">Loading student register…</div>
+</div>
+
 <header>
   <div class="header-inner">
     <div class="logo">
@@ -204,13 +216,13 @@
     <div class="header-actions">
       <span class="sync-pill" id="sync-pill">
         <span class="sync-dot" id="sync-dot"></span>
-        <span id="sync-label">No sheet linked</span>
+        <span id="sync-label">Loading…</span>
       </span>
       <div id="admin-controls" style="display:none;gap:6px;align-items:center;">
         <span class="admin-badge">Admin</span>
-        <button class="btn btn-outline btn-sm" onclick="openSheetModal()">
-          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-          Google Sheet
+        <button class="btn btn-outline btn-sm" onclick="syncNow()">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+          Sync Now
         </button>
         <button class="btn btn-outline btn-sm" onclick="openUpload()">
           <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
@@ -239,20 +251,18 @@
   </div>
 </div>
 
-<div class="sheet-banner" id="sheet-banner" style="display:none;">
+<div class="sheet-banner" id="sheet-banner">
   <div class="sheet-banner-inner">
     <span class="sheet-icon">📗</span>
     <div class="sheet-info">
       <strong>Live Google Sheet Connected</strong>
-      <span id="sheet-url-display">—</span>
+      <span id="sheet-url-display">Auto-syncing from Google Sheets</span>
     </div>
     <div class="sheet-actions" id="sheet-banner-actions" style="display:none;">
       <button class="btn btn-outline btn-sm" onclick="syncNow()">
         <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
         Sync Now
       </button>
-      <button class="btn btn-outline btn-sm" onclick="openSheetModal()">Edit</button>
-      <button class="btn btn-sm" style="color:var(--red);border-color:#fecaca;background:var(--red-light);" onclick="removeSheet()">Remove</button>
     </div>
   </div>
 </div>
@@ -306,59 +316,6 @@
     <div class="modal-foot">
       <button class="btn btn-outline btn-sm" onclick="closeLoginModal()">Cancel</button>
       <button class="btn btn-primary btn-sm" onclick="doLogin()">Login</button>
-    </div>
-  </div>
-</div>
-
-<!-- GOOGLE SHEET MODAL -->
-<div class="overlay" id="sheet-modal">
-  <div class="modal">
-    <div class="modal-head">
-      <h2>Link Google Sheet</h2>
-      <button class="modal-close" onclick="closeSheetModal()">&#215;</button>
-    </div>
-    <div class="modal-body">
-      <div class="info-box" style="margin-bottom:16px;">
-        <strong>How to publish your Google Sheet:</strong>
-        <ol>
-          <li>Open your Google Sheet</li>
-          <li>Click <strong>File &rarr; Share &rarr; Publish to web</strong></li>
-          <li>Select your sheet tab, choose <strong>Comma-separated values (.csv)</strong></li>
-          <li>Click <strong>Publish</strong> &rarr; copy the URL</li>
-        </ol>
-        <div style="margin-top:10px;"><strong>Your sheet must follow this column layout:</strong></div>
-        <table class="format-table">
-          <thead><tr><th>Col A</th><th>Col B</th><th>Col C</th></tr></thead>
-          <tbody>
-            <tr class="group-row"><td colspan="3">GROUP 1 &nbsp;<em style="font-weight:400;opacity:.6">(in any column of the row)</em></td></tr>
-            <tr><td>1</td><td>STUDENT FULL NAME</td><td>20231363165</td></tr>
-            <tr><td>2</td><td>ANOTHER STUDENT</td><td>20231399832</td></tr>
-            <tr class="group-row"><td colspan="3">GROUP 2</td></tr>
-            <tr><td>21</td><td>NEXT GROUP STUDENT</td><td>20231367415</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="form-group">
-        <label>Published CSV URL</label>
-        <input type="url" id="sheet-url-input" placeholder="https://docs.google.com/spreadsheets/d/.../pub?output=csv">
-        <p class="hint">The sheet must be published publicly (no login required to view).</p>
-      </div>
-      <div class="form-group">
-        <label>Auto-sync interval</label>
-        <select id="sync-interval">
-          <option value="0">Manual only</option>
-          <option value="2">Every 2 minutes</option>
-          <option value="5" selected>Every 5 minutes</option>
-          <option value="10">Every 10 minutes</option>
-          <option value="30">Every 30 minutes</option>
-        </select>
-      </div>
-      <p class="error-msg" id="sheet-error"></p>
-    </div>
-    <div class="modal-foot">
-      <button class="btn btn-outline btn-sm" onclick="closeSheetModal()">Cancel</button>
-      <button class="btn btn-warning btn-sm" id="test-sheet-btn" onclick="testSheetUrl()">Test Connection</button>
-      <button class="btn btn-primary btn-sm" onclick="saveSheetUrl()">Save &amp; Sync</button>
     </div>
   </div>
 </div>
@@ -427,8 +384,16 @@
 // ══════════════════════════════════════════
 const ADMIN_PASSWORD = 'csc322admin';
 
+// ── HARDCODED SHEET URL ──────────────────
+// This is fetched on every page load for every visitor.
+// To update the data source, change this URL.
+const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ3JnUXglSVG7eAl8RizAVovrsMVHOReGcRN2epsiykVvrAMxl8qrsl-Zrg-JKlJ0vKjFwan6e7unmi/pub?output=csv';
+
+// Auto-sync interval in minutes (set to 0 to disable auto-sync)
+const AUTO_SYNC_MINUTES = 5;
+
 // ══════════════════════════════════════════
-//  SEED DATA (your exact sheet data)
+//  SEED DATA (fallback if sheet is unreachable)
 // ══════════════════════════════════════════
 const SEED_DATA = {"GROUP 1":[{"sn":"1","name":"OKONKWO CHIBUIKE JOEL","matric":"20231363165"},{"sn":"2","name":"OHUCHE DAVID KELECHI","matric":"20242485622"},{"sn":"3","name":"ISAAC-EZEMUOKA CHINENYEZE FORTU","matric":"20231394482"},{"sn":"4","name":"DIKE CHINEDU DAVID","matric":"20231399832"},{"sn":"5","name":"ODETADE JEFFREY TEMITAYO","matric":"20231380702"},{"sn":"6","name":"OKOLIE CHUKWUEMEKA JOSEPH","matric":"20231407712"},{"sn":"7","name":"IDIKA BLESSING UDUMA","matric":"20231367205"},{"sn":"8","name":"AGU CHUKWUEBUKA MICHEAL","matric":"20231368445"},{"sn":"9","name":"IHECHERE IFEANYI SOLOMON","matric":"20231374485"},{"sn":"10","name":"VAL-CHINAGI GOODNESS UCHECHI","matric":"20231363245"},{"sn":"11","name":"UDENENWU CHINONSO MICHAEL","matric":"20231364115"},{"sn":"12","name":"OGBONNA TREASURE CHINYERE","matric":"20231399562"},{"sn":"13","name":"ALAEFUNA CHUKWUEDOZIE CHUKWU","matric":"20231366615"},{"sn":"14","name":"NWAOZIRI IZUCHUKWU SOLOMON","matric":"20231375155"},{"sn":"15","name":"ONU HYACINTH CHIDUBEM","matric":"20231376975"},{"sn":"16","name":"UGBOBUAKU CHUKWUMA CHRISTIAN","matric":"20231380732"},{"sn":"17","name":"ALABILA MARK OJOCHOGWU","matric":"20231387692"},{"sn":"18","name":"HUMBLE WORTHY CHINEM","matric":"20231413812"},{"sn":"19","name":"UKACHI TOCHUKWU DANIEL","matric":"20231372145"},{"sn":"20","name":"ONWUKA UCHECHUKWU STANLEY","matric":"20231415122"}],"GROUP 2":[{"sn":"21","name":"MMEGWA UZONNA ANTHONY","matric":"20231367415"},{"sn":"22","name":"MMEREOLE CHINWE ANGELA","matric":"20231366515"},{"sn":"23","name":"CHUKWUEMEKA ANTHONY SOMTOCH","matric":"20231368075"},{"sn":"24","name":"ABONYI SOMTOCHUKWU VICTOR","matric":"20231395632"},{"sn":"25","name":"OGBAJI UGOCHUKWU PRECIOUS","matric":"20231410562"},{"sn":"26","name":"NNOLI CHIOMA NAOMI","matric":"20231372345"},{"sn":"27","name":"JONATHAN MIRACLE AMARACHI","matric":"20231373865"},{"sn":"28","name":"IBE PRECIOUS CHIMEZIE","matric":"20231368935"},{"sn":"29","name":"ABIAHU FORTUNE CHUKWUEBUKA","matric":"20231386102"},{"sn":"30","name":"ISREAL DIVINE UCHENNA","matric":"20231413092"},{"sn":"31","name":"OGBU PROMISE UCHA","matric":"20231388752"},{"sn":"32","name":"EBERE KANTOCHUKWU CHRISTIAN","matric":"20231412742"},{"sn":"33","name":"ODUMA JOSEPH CHINECHEREM","matric":"20231386442"},{"sn":"34","name":"OLIVER UCHECHUKWU ONYEDIKACHI","matric":"20231386542"},{"sn":"35","name":"NJOKU DANIEL CHIMEREUCHEYA","matric":"20231390952"},{"sn":"36","name":"POLLYSON DANIEL ONYENDIKACHI","matric":"20231394852"},{"sn":"37","name":"DIALACHUKWU DONATUS EZEUGO","matric":"20231366175"},{"sn":"38","name":"OKOLIE MAUREEN ECHEZONACHUKWU","matric":"20231398922"},{"sn":"39","name":"UZOMA JOSHUA CHUKWUEMEKA","matric":"20231415592"},{"sn":"40","name":"CHUKWU PROSPER CHINEMEREM","matric":"20231367895"}],"GROUP 3":[{"sn":"41","name":"IWUORIE SOMTO DAVID","matric":"20231383542"},{"sn":"42","name":"OKOLI UGONNA ALEXANDER","matric":"20231366965"},{"sn":"43","name":"ULU CHIKAMALA PETER","matric":"20231398972"},{"sn":"44","name":"IBE SOCHIMA ABUMCHI","matric":"20231380342"},{"sn":"45","name":"IHEAKA DICKSON EGWUONWU","matric":"20231402022"},{"sn":"46","name":"OKOYE KEVIN CHIBUEZE","matric":"20231374425"},{"sn":"47","name":"CHUKWUEMEKA NOBLE UCHENNAYA","matric":"20231369915"},{"sn":"48","name":"CHINE UDODI EXCEL OKWUCHUKWU","matric":"20231368005"},{"sn":"49","name":"CHINEKEZI DAVID CHIDIEBERE","matric":"20231383512"},{"sn":"50","name":"OBASI SAMUEL CHIDIEBERE","matric":"20231382762"},{"sn":"51","name":"DANIEL ABRAHAM AMARACHI","matric":"20231373795"},{"sn":"52","name":"UGWUZOR OLUEBUBE PRAISE","matric":"20231361995"},{"sn":"53","name":"OBIORA CHUKWUEMEKA CHINECHERE","matric":"20231394122"},{"sn":"54","name":"EKWEBELEM GABRIEL NNAMDI","matric":"20231365415"},{"sn":"55","name":"IWUNZE CHUKWUEBUKA MICHAEL","matric":"20231394922"},{"sn":"56","name":"NNOLUM FESTUS CHIDERA","matric":"20231386262"},{"sn":"57","name":"OKWUMUO ADANNA JACINTA","matric":"20231375455"},{"sn":"58","name":"ONUOHA VICTORY CHUKWUDALU","matric":"20231407372"},{"sn":"59","name":"AKUKWE EKENE SUCCESS","matric":"20231367105"},{"sn":"60","name":"OPENE CHUKWUDOZIE ISRAEL","matric":"20231388562"}],"GROUP 4":[{"sn":"61","name":"AHAMEFULA DESMOND UZOMA","matric":"20231389252"},{"sn":"62","name":"JEREMIAH OSINIGWE KESSINGTON","matric":"20231380952"},{"sn":"63","name":"OMEKEDO ELO GREAT","matric":"20231413572"},{"sn":"64","name":"EMEH DANIEL ONYEKACHI","matric":"20231388272"},{"sn":"65","name":"OHAEGBU IFEANYICHUKWU KINGSLEY","matric":"20231399182"},{"sn":"66","name":"LAZARUS FAVOUR TOCHUKWU","matric":"20231381402"},{"sn":"67","name":"ANI ALEXANDER EBUBECHUKWU","matric":"20231366315"},{"sn":"68","name":"MANAFA GERRARD CHINEDU","matric":"20231374105"},{"sn":"69","name":"CHIDEBERE WISDOM","matric":"20231364235"},{"sn":"70","name":"NWACHUKWU PRINCE CHIGOZIE","matric":"20231413892"},{"sn":"71","name":"AKINWALE VICTOR MAYOWA","matric":"20231392752"},{"sn":"72","name":"EVANS-DIKE PRINCE MUNACHIMSO","matric":"20231381422"},{"sn":"73","name":"IKENNA ELVIS MUNACHIMSO","matric":"20231397702"},{"sn":"74","name":"CHRISTIAN VICTORY CHIBUIKE","matric":"20231390672"},{"sn":"75","name":"ONWUDEBE OGUZIE KINGSLEY","matric":"20231362675"},{"sn":"76","name":"ALOZIE CHIBUEZE ONYINYECHI","matric":"20231364045"},{"sn":"77","name":"CHUKWUEMEKA SUCCESS CHINONSO","matric":"20231370145"},{"sn":"78","name":"EZE FERDINAND SOMTO","matric":"20231390252"},{"sn":"79","name":"ONYEJESI CHIEMEZIE MITCHELL","matric":"20231399512"},{"sn":"80","name":"IHEAKACHUKWU MERCY CHIFURUMNA","matric":"20231402992"}],"GROUP 5":[{"sn":"81","name":"EZEONYILIMBA DAVID CHIDERA","matric":"20231415192"},{"sn":"82","name":"OZOEJIKE CHINONSO STEPHEN","matric":"20231366975"},{"sn":"83","name":"HYACINTH CHUKWUBUIKEM JOEL","matric":"20231397482"},{"sn":"84","name":"COLLINS CHIDERA EBITE","matric":"20231374765"},{"sn":"85","name":"ESIABA CHARLES CHIBUIKE","matric":"20231407872"},{"sn":"86","name":"ONUOHA DANIEL CHIBUEZE","matric":"20231371335"},{"sn":"87","name":"AMOBI CINDY AMARACHI","matric":"20231368765"},{"sn":"88","name":"PATRICK KOSISOCHUKWU KELVIN","matric":"20231402782"},{"sn":"89","name":"OBIAGUNMADU FAITH UWAOMA","matric":"20231368845"},{"sn":"90","name":"AKADIEZE ERIC CHUKWUEMEKA","matric":"20231373095"},{"sn":"91","name":"EHIOGU CHINEMEREM JUSTICE","matric":"20231374255"},{"sn":"92","name":"UDOCHUKWU GREAT UDOCHUKWU","matric":"20231393392"},{"sn":"93","name":"NWARIEJI MICHAEL ONYEKACHI","matric":"20231378552"},{"sn":"94","name":"ODOEKWU MICHAEL EBUBECHUKWU","matric":"20231366145"},{"sn":"95","name":"OKPARA JOSEPH UCHENNA","matric":"20231361275"},{"sn":"96","name":"INNOCENT CHISOM JOEL","matric":"20231361585"},{"sn":"97","name":"ALOZIE GODWIN IFEANYI","matric":"20231378425"},{"sn":"98","name":"IHEDORO IFEANYICHUKWU DESMOND","matric":"20231367795"},{"sn":"99","name":"OMERUAH LILLIAN AKUOMA","matric":"20231364475"},{"sn":"100","name":"HILLARY CHUKWUMA PRINCE","matric":"20231361765"}],"GROUP 6":[{"sn":"101","name":"ADAMS EMMANUEL CHIDINMA","matric":"20231387092"},{"sn":"102","name":"ORIWOH GODWIN CHINECHEREM","matric":"20231392032"},{"sn":"103","name":"PEDRO DENNIS CHIKAMSO","matric":"20231384792"},{"sn":"104","name":"OKORO-ENYI REGINALD CHIDERA","matric":"20231371755"},{"sn":"105","name":"OKLIKA MICHAEL ADA-IJACHI OCHEME","matric":"20231384572"},{"sn":"106","name":"ALANEME CHUKWUEMEKA EMMANUEL","matric":"20231369145"},{"sn":"107","name":"OBI-NJOKU GEORGE JAACHIMIKE","matric":"20231361775"},{"sn":"108","name":"SAMSON CHIMARAOKE CHIZOR","matric":"20231385312"},{"sn":"109","name":"ONUOHA EBUBE EMMANUEL","matric":"20231404912"},{"sn":"110","name":"IWUOHA MARTINS IKECHUKWU","matric":"20231390212"},{"sn":"111","name":"ASIULOKA FAVOUR OZIOMA","matric":"20231362465"},{"sn":"112","name":"NNAMANI CHUKWUEBUKA CHRISTIAN","matric":"20231386002"},{"sn":"113","name":"OKOYE OLISA GODSPOWER","matric":"20231405812"},{"sn":"114","name":"AKUEGBU CHIDERA STANLEY","matric":"20231386882"},{"sn":"115","name":"NWADINOBI CHIGOZIE MARTINS","matric":"20231361615"},{"sn":"116","name":"KALU UDE CHIKA","matric":"20231368805"},{"sn":"117","name":"JIBULU CHINECHEREM FAVOUR","matric":"20231390852"},{"sn":"118","name":"CHINEKEZI VICTOR IKECHUKWU","matric":"20231394321"},{"sn":"119","name":"NWABUIFE EMMANUEL CHIMAOBI","matric":"20231371885"},{"sn":"120","name":"DOZIE CHIDIEBUBE CELESTINE","matric":"20231378815"}],"GROUP 7":[{"sn":"121","name":"OKOLI CHINONSO VICTOR","matric":"20231379782"},{"sn":"122","name":"AGUBATA CHISOM KINGSLEY","matric":"20231384372"},{"sn":"123","name":"OGUNDU EVEREST KOSISOCHUKWU","matric":"20231418602"},{"sn":"124","name":"ORUKWOWU GODSSON ONYEKWERE","matric":"20231383962"},{"sn":"125","name":"OFOEGBU CHIDIEBEUBE PRINCEWILLY","matric":"20231394532"},{"sn":"126","name":"ANUJURU FAVOUR CHIAGOZIEM","matric":"20231392092"},{"sn":"127","name":"OKAFOR CHINAZA RAPHAEL","matric":"20231368835"},{"sn":"128","name":"ONWE DAVID IFEANYICHUKWU","matric":"20231408162"},{"sn":"129","name":"ADINNU LOUIS CHUKWUEMEKA","matric":"20231404952"},{"sn":"130","name":"ONYEMAELU VALERI CHIOMA","matric":"20231393812"},{"sn":"131","name":"ANAEKE VALERIAN IFEANYI","matric":"20231402072"},{"sn":"132","name":"PRAISE CHIBUEZE CONFIDENCE","matric":"20242477972"},{"sn":"133","name":"UZOMA ONYEDIKACHI COLLINS","matric":"20231390132"},{"sn":"134","name":"NWOKEKE AUSTINE CHIEMERIE","matric":"20231365765"},{"sn":"135","name":"NNANNA GOODNESS NMA","matric":"20231369895"},{"sn":"136","name":"ABRAHAM EBUBE EMMANUEL","matric":"20231386092"},{"sn":"137","name":"ELEFUE DIVINE ONYINYECHI","matric":"20231372805"},{"sn":"138","name":"BRIGHT PRINCEWILL MUNACHIMSO","matric":"20231362805"},{"sn":"139","name":"ANDREW CHINONSO JEREMIAH","matric":"20232138175"},{"sn":"140","name":"AGBAI OBASI UWA","matric":"20231411752"}],"GROUP 8":[{"sn":"141","name":"CHUKWUEMEKA CHIDERA KENNEDY","matric":"20231414982"},{"sn":"142","name":"IHEJIETO NZUBECHUKWU DAVID","matric":"20231405642"},{"sn":"143","name":"NWACHUKWU OZIOMA CHUKWUNONY","matric":"20231393572"},{"sn":"144","name":"AZUBUIKE EBENEZER IFEANYI","matric":"20231404822"},{"sn":"145","name":"ISIEKWENE PATRICK EMEKA","matric":"20231392822"},{"sn":"146","name":"AHAOMA-DICK CHIAMAKA FAVOUR","matric":"20231369715"},{"sn":"147","name":"EJEGBU KENNETH CHIMAECHI","matric":"20231405682"},{"sn":"148","name":"ANYAOHA CHUKWUKA FESTUS","matric":"20231386272"},{"sn":"149","name":"MOSES MKPUME","matric":"20231406932"},{"sn":"150","name":"BALOGUN JOHN MUNACHIMSO","matric":"20231406612"},{"sn":"151","name":"MPAMUGO NDUBUISI NDUBUISI","matric":"20231375775"},{"sn":"152","name":"AMADI PETER CHIMEBUKA","matric":"20231393012"},{"sn":"153","name":"JOHN-ANORUO ONYEMAOBICHUKWU","matric":"20231417942"},{"sn":"154","name":"JOHN EMMANUEL NNANNA","matric":"20231371565"},{"sn":"155","name":"EZE DONALD KAMDICHUKWU","matric":"20231373595"},{"sn":"156","name":"AMOS PRAISE YABO","matric":"20231366555"},{"sn":"157","name":"IKECHUKWU STEPHEN OLUWATOBI","matric":"20231393612"},{"sn":"158","name":"AKAUBA BENEDICT CHIJIOKE","matric":"20231409522"},{"sn":"159","name":"GODFREY CHINAECHEREM PROSPER","matric":"20231381772"},{"sn":"160","name":"ELEKWA VALENTINE ASOR","matric":"20231370245"}],"GROUP 9":[{"sn":"161","name":"OHEMU DAVID PROMISE","matric":"20231401142"},{"sn":"162","name":"UKAEGBU KINGSLEY CHIDIEBERE","matric":"20231386772"},{"sn":"163","name":"OPARA SAVIOUR CHINONSO","matric":"20231396302"},{"sn":"164","name":"ONYEJI DELIGHT CHIDIEBUBE","matric":"20231380412"},{"sn":"165","name":"UMOH UBONG-ABASI NSIMA","matric":"20231398352"},{"sn":"166","name":"OZOEMENLA AZUBUIKE MICHAEL","matric":"20231367025"},{"sn":"167","name":"EZENU CHIEMERIE PRECIOUS","matric":"20242493672"},{"sn":"168","name":"ONYEAKAZI UGOCHUKWU EMMANUEL","matric":"20231374825"},{"sn":"169","name":"URUM-EKE EMEKA JOSHUA","matric":"20231399792"},{"sn":"170","name":"UGOCHUKWU ZERUBABBEL CHIGEMEZ","matric":"20231370295"},{"sn":"171","name":"AZUBUIKE KINGSLEY CHIBUIKEM","matric":"20231368345"},{"sn":"172","name":"NWAFOR OLUEBUBE THEOPHILUS","matric":"20231388092"},{"sn":"173","name":"OPARA CHIGOZIRIM VICTOR","matric":"20231402372"},{"sn":"174","name":"NNAJI LORDSON ONYEKACHI","matric":"20231402742"},{"sn":"175","name":"EZIMAKOR UCHEOMA DANIELLA","matric":"20231385222"},{"sn":"176","name":"KALU UKA CHIEMERIE MIRACLE","matric":"20231363215"},{"sn":"177","name":"IBE ANTHONY UGOCHUKWU","matric":"20231411772"},{"sn":"178","name":"OKORO WILLIAMS CHUKWUEMEKA","matric":"20231379575"},{"sn":"179","name":"NNAJI KELVIN EZENWA","matric":"20231399322"},{"sn":"180","name":"OBANI IKECHUKWU OZIOMA","matric":"20231368575"}],"GROUP 10":[{"sn":"181","name":"UZOMA HENRY CHUKWUEBUKA","matric":"20231361555"},{"sn":"182","name":"OHAGWU MARVEL CHIGOZIRIM","matric":"20231366125"},{"sn":"183","name":"MICHAEL CHIDERA SAMUEL","matric":"20231399772"},{"sn":"184","name":"CHIDEBE LAWRENCE NWABUFO","matric":"20231413452"},{"sn":"185","name":"JONATHAN VICTORY CHIDIEBERE","matric":"20231394172"},{"sn":"186","name":"CHIBUZOR JOHN CHIMARAOKE","matric":"20231363335"},{"sn":"187","name":"DURU BEDE CHINWEOTITO","matric":"20231387772"},{"sn":"188","name":"PATRICK SUCCESS IKECHUKWU","matric":"20231374845"},{"sn":"189","name":"ACHUGO OBINNA DAVIDMAT","matric":"20231377705"},{"sn":"190","name":"ANYANKA CHIAGOZIE DIVINE","matric":"20231404782"},{"sn":"191","name":"CHIKA WISDOM NNAEMEKA","matric":"20231399732"},{"sn":"192","name":"DIKE NNAMDI","matric":"20231386022"},{"sn":"193","name":"DURUCHUKWU CHIDIEBUBE DAMIAN","matric":"20231361735"},{"sn":"194","name":"EYO WISDOM ARCHIBONG","matric":"20231416782"},{"sn":"195","name":"IJERE SAVOUR TOCHUKWU","matric":"20231376775"},{"sn":"196","name":"INNOCENT GUZOROCHUKWU WINNER","matric":"20231409282"},{"sn":"197","name":"MARTINS DIVINE CHIDERA","matric":"20231369345"},{"sn":"198","name":"NZEANOCHIEH CHIMDIOGO CHIKEZIRI","matric":"20231396052"},{"sn":"199","name":"OKEOMA MAGNUS CHIBUEZE","matric":"20231379485"},{"sn":"200","name":"OKONKWO EMMANUELLA OLUCHI","matric":"20231383902"}],"GROUP 11":[{"sn":"201","name":"OPARAH MARTINS CHISOM","matric":"20231365335"}]};
 
@@ -439,7 +404,6 @@ let groups = {};
 let pendingImport = null;
 let isAdmin = false;
 let syncTimer = null;
-let sheetConfig = { url: '', interval: 5 };
 
 const avatarColors = [
   ['#eff6ff','#2563eb'],['#f0fdf4','#16a34a'],['#fff7ed','#d97706'],
@@ -450,18 +414,6 @@ function avatarStyle(n) {
   const i = (n.charCodeAt(0)||0) % 10;
   return `background:${avatarColors[i][0]};color:${avatarColors[i][1]};`;
 }
-
-// ══════════════════════════════════════════
-//  STORAGE
-// ══════════════════════════════════════════
-function loadData() {
-  try { const c = localStorage.getItem('csc322_sheet_config'); if(c) sheetConfig = JSON.parse(c); } catch(e){}
-  try { const s = localStorage.getItem('csc322_bpg_v1'); if(s){ groups=JSON.parse(s); return; } } catch(e){}
-  groups = JSON.parse(JSON.stringify(SEED_DATA));
-  saveData();
-}
-function saveData() { try { localStorage.setItem('csc322_bpg_v1', JSON.stringify(groups)); } catch(e){} }
-function saveSheetConfig() { try { localStorage.setItem('csc322_sheet_config', JSON.stringify(sheetConfig)); } catch(e){} }
 
 // ══════════════════════════════════════════
 //  SYNC STATUS
@@ -476,20 +428,15 @@ function updateLastSync() {
 }
 
 // ══════════════════════════════════════════
-//  SHEET PARSER — calibrated for your exact format:
-//  Group header: any cell in a row matches /GROUP\s*\d+/i
-//  Student row:  col[0]=number(sn), col[1]=name string, col[2]=number(matric)
-//  Works for BOTH CSV (from Google Sheets) and XLSX (SheetJS rows)
+//  SHEET PARSER
 // ══════════════════════════════════════════
 function parseSheetRows(rows) {
-  // rows = array of arrays, values already extracted
   const result = {};
   let cur = null;
 
   rows.forEach(row => {
     if (!row || row.every(v => v === null || v === undefined || String(v).trim() === '')) return;
 
-    // ── detect group header: any cell in the row matches GROUP N ──
     const cells = row.map(v => String(v ?? '').trim());
     const groupCell = cells.find(c => /^GROUP\s*\d+$/i.test(c));
     if (groupCell) {
@@ -500,28 +447,21 @@ function parseSheetRows(rows) {
 
     if (!cur) return;
 
-    // ── detect student row ──
-    // Pattern A (your xlsx): col0=float sn, col1=name string, col2=float matric
-    // Pattern B (CSV may vary): col0=sn, col1=name, col2=matric  OR  col0=name (no sn)
     let sn, name, matric;
-
     const c0 = cells[0], c1 = cells[1] || '', c2 = cells[2] || '';
 
     if (!isNaN(c0) && c0 !== '' && c1 && isNaN(c1)) {
-      // Standard: numeric sn, name in col1
       sn    = String(Math.round(Number(c0)));
       name  = c1;
       matric = (!isNaN(c2) && c2 !== '') ? String(Math.round(Number(c2))) : c2;
     } else if (c0 && isNaN(c0) && c0 !== '') {
-      // Name in col0 (no sn column)
       sn    = String(result[cur].length + 1);
       name  = c0;
       matric = (!isNaN(c1) && c1 !== '') ? String(Math.round(Number(c1))) : c1;
     } else {
-      return; // skip unrecognised rows (headers, blanks, etc.)
+      return;
     }
 
-    // Skip header-like rows
     if (/^(s\/n|sn|no|#|name|student)/i.test(name)) return;
 
     result[cur].push({ sn, name: name.toUpperCase().trim(), matric: matric || '' });
@@ -531,7 +471,7 @@ function parseSheetRows(rows) {
 }
 
 // ══════════════════════════════════════════
-//  CSV → rows  (handles quoted fields)
+//  CSV → rows
 // ══════════════════════════════════════════
 function csvToRows(csv) {
   return csv.split('\n').map(line => {
@@ -549,17 +489,17 @@ function csvToRows(csv) {
 
 // ══════════════════════════════════════════
 //  GOOGLE SHEET FETCH & SYNC
+//  Called on every page load for every visitor
 // ══════════════════════════════════════════
-async function fetchSheet(url, silent=false) {
-  if (!url) return false;
+async function fetchSheet(silent = false) {
   if (!silent) setSyncStatus('syncing', 'Syncing…');
 
-  const proxy = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+  const proxy = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(SHEET_URL);
   let csv = null;
 
-  for (const src of [proxy, url]) {
+  for (const src of [proxy, SHEET_URL]) {
     try {
-      const r = await fetch(src, { cache:'no-store' });
+      const r = await fetch(src, { cache: 'no-store' });
       if (!r.ok) continue;
       csv = await r.text();
       break;
@@ -568,109 +508,40 @@ async function fetchSheet(url, silent=false) {
 
   if (!csv) {
     setSyncStatus('error', 'Sync failed');
-    if (!silent) toast('Could not reach the Google Sheet. Check the URL.', 'error');
+    if (!silent) toast('Could not reach Google Sheet. Showing cached data.', 'warning');
     return false;
   }
 
   const parsed = parseSheetRows(csvToRows(csv));
   if (!parsed) {
     setSyncStatus('error', 'Parse failed');
-    if (!silent) toast('Fetched but no GROUP headers found. Check your sheet layout.', 'error');
+    if (!silent) toast('Sheet fetched but no GROUP headers found.', 'error');
     return false;
   }
 
   groups = parsed;
-  saveData(); updateLastSync(); setSyncStatus('synced', 'Synced'); rebuild();
-  if (!silent) toast('Sheet synced — ' + Object.values(groups).flat().length + ' students loaded', 'success');
+  updateLastSync();
+  setSyncStatus('synced', 'Live — Google Sheets');
+  rebuild();
+  if (!silent) toast('Synced — ' + Object.values(groups).flat().length + ' students loaded', 'success');
   return true;
 }
 
 async function syncNow() {
-  if (!sheetConfig.url) { toast('No sheet linked yet.', 'warning'); return; }
-  await fetchSheet(sheetConfig.url, false);
+  setSyncStatus('syncing', 'Syncing…');
+  const ok = await fetchSheet(false);
+  if (!ok) toast('Sync failed. Check your internet connection.', 'error');
 }
 
 function startAutoSync() {
   if (syncTimer) clearInterval(syncTimer);
-  if (sheetConfig.interval > 0 && sheetConfig.url)
-    syncTimer = setInterval(() => fetchSheet(sheetConfig.url, true), sheetConfig.interval * 60000);
-}
-
-function updateSheetBanner() {
-  const banner = document.getElementById('sheet-banner');
-  const actions = document.getElementById('sheet-banner-actions');
-  if (sheetConfig.url) {
-    banner.style.display = '';
-    document.getElementById('sheet-url-display').textContent = sheetConfig.url;
-    actions.style.display = isAdmin ? 'flex' : 'none';
-    setSyncStatus('synced', 'Sheet linked');
-  } else {
-    banner.style.display = 'none';
-    setSyncStatus('', 'No sheet linked');
+  if (AUTO_SYNC_MINUTES > 0) {
+    syncTimer = setInterval(() => fetchSheet(true), AUTO_SYNC_MINUTES * 60000);
   }
 }
 
 // ══════════════════════════════════════════
-//  SHEET MODAL
-// ══════════════════════════════════════════
-function openSheetModal() {
-  document.getElementById('sheet-url-input').value = sheetConfig.url || '';
-  document.getElementById('sync-interval').value = String(sheetConfig.interval || 5);
-  document.getElementById('sheet-error').style.display = 'none';
-  document.getElementById('sheet-modal').classList.add('open');
-}
-function closeSheetModal() { document.getElementById('sheet-modal').classList.remove('open'); }
-
-async function testSheetUrl() {
-  const url = document.getElementById('sheet-url-input').value.trim();
-  if (!url) { toast('Enter a URL first.', 'warning'); return; }
-  document.getElementById('sheet-error').style.display = 'none';
-  const btn = document.getElementById('test-sheet-btn');
-  btn.textContent = 'Testing…'; btn.disabled = true;
-
-  const proxy = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
-  let csv = null;
-  for (const src of [proxy, url]) {
-    try { const r = await fetch(src,{cache:'no-store'}); if(r.ok){csv=await r.text();break;} } catch(e){}
-  }
-
-  btn.textContent = 'Test Connection'; btn.disabled = false;
-  if (!csv) {
-    const el = document.getElementById('sheet-error');
-    el.style.display = 'block';
-    el.textContent = 'Could not fetch the URL. Make sure the sheet is published publicly (File → Share → Publish to web).';
-    return;
-  }
-  const parsed = parseSheetRows(csvToRows(csv));
-  if (parsed) {
-    toast('✅ Connected — ' + Object.keys(parsed).length + ' groups, ' + Object.values(parsed).flat().length + ' students detected', 'success');
-  } else {
-    const el = document.getElementById('sheet-error');
-    el.style.display = 'block';
-    el.textContent = 'Connected but no GROUP headers found. Make sure rows contain "GROUP 1", "GROUP 2", etc. as a cell value.';
-  }
-}
-
-async function saveSheetUrl() {
-  const url = document.getElementById('sheet-url-input').value.trim();
-  if (!url) { toast('Enter a URL.', 'warning'); return; }
-  sheetConfig.url = url;
-  sheetConfig.interval = parseInt(document.getElementById('sync-interval').value) || 0;
-  saveSheetConfig(); closeSheetModal(); updateSheetBanner(); startAutoSync();
-  await fetchSheet(url, false);
-}
-
-function removeSheet() {
-  if (!confirm('Remove the linked sheet? Current data stays, auto-sync stops.')) return;
-  sheetConfig.url = ''; sheetConfig.interval = 5;
-  saveSheetConfig();
-  if (syncTimer) { clearInterval(syncTimer); syncTimer = null; }
-  updateSheetBanner();
-  toast('Sheet removed.', 'info');
-}
-
-// ══════════════════════════════════════════
-//  XLSX UPLOAD  (uses same parser)
+//  XLSX UPLOAD
 // ══════════════════════════════════════════
 function openUpload() { document.getElementById('upload-modal').classList.add('open'); resetUploadUI(); }
 function closeUpload() { document.getElementById('upload-modal').classList.remove('open'); pendingImport = null; }
@@ -696,7 +567,6 @@ function processFile(file) {
   reader.onload = e => {
     try {
       const wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
-      // Use sheet_to_json with header:1 to get raw rows as arrays
       const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header:1, defval:''});
       const parsed = parseSheetRows(rows);
       if (!parsed || !Object.keys(parsed).length) { toast('No groups detected. Check column layout.','error'); return; }
@@ -721,7 +591,8 @@ function showImportSummary(filename, data) {
 }
 function importXlsx() {
   if (!pendingImport) return;
-  groups=pendingImport; saveData(); rebuild(); closeUpload();
+  groups=pendingImport; rebuild(); closeUpload();
+  setSyncStatus('synced', 'Uploaded file');
   toast('Imported '+Object.values(groups).flat().length+' students across '+Object.keys(groups).length+' groups','success');
 }
 
@@ -729,10 +600,11 @@ function importXlsx() {
 //  ADMIN AUTH
 // ══════════════════════════════════════════
 function setAdminMode(on) {
-  isAdmin=on;
-  document.getElementById('admin-controls').style.display=on?'flex':'none';
-  document.getElementById('admin-login-btn').style.display=on?'none':'';
-  updateSheetBanner(); rebuild();
+  isAdmin = on;
+  document.getElementById('admin-controls').style.display = on ? 'flex' : 'none';
+  document.getElementById('admin-login-btn').style.display = on ? 'none' : '';
+  document.getElementById('sheet-banner-actions').style.display = on ? 'flex' : 'none';
+  rebuild();
 }
 function openLoginModal(){document.getElementById('login-modal').classList.add('open');document.getElementById('admin-password').value='';document.getElementById('login-error').style.display='none';setTimeout(()=>document.getElementById('admin-password').focus(),150);}
 function closeLoginModal(){document.getElementById('login-modal').classList.remove('open');}
@@ -743,13 +615,29 @@ function doLogin(){
 function logoutAdmin(){setAdminMode(false);toast('Logged out.','info');}
 
 // ══════════════════════════════════════════
-//  INIT
+//  INIT — always fetch from sheet on load
 // ══════════════════════════════════════════
-function init() {
-  loadData();
+async function init() {
+  // Start with seed data so UI isn't blank while loading
+  groups = JSON.parse(JSON.stringify(SEED_DATA));
   buildTabs(); buildAllView(); buildSections(); populateSelect(); updateStats();
-  updateSheetBanner();
-  if (sheetConfig.url) { fetchSheet(sheetConfig.url,false); startAutoSync(); }
+
+  // Fetch live data from Google Sheet (every visitor, every session)
+  setSyncStatus('syncing', 'Loading…');
+  const ok = await fetchSheet(true);
+
+  if (!ok) {
+    // Sheet unreachable — keep seed data, show warning
+    setSyncStatus('error', 'Using cached data');
+    toast('Could not reach Google Sheet. Showing built-in data.', 'warning');
+    updateLastSync();
+  }
+
+  // Hide loading overlay
+  document.getElementById('loading-overlay').classList.add('hidden');
+
+  // Start auto-sync
+  startAutoSync();
 }
 
 // ══════════════════════════════════════════
@@ -826,12 +714,12 @@ function addStudents(){
   if(!groups[target])groups[target]=[];
   const parsed=parseNames(raw);let maxSn=Object.values(groups).flat().reduce((m,s)=>Math.max(m,parseInt(s.sn)||0),0);
   parsed.forEach(p=>{maxSn++;groups[target].push({sn:String(maxSn),name:p.name,matric:p.matric,isNew:true});});
-  saveData();rebuild();closeAddStudents();toast(`Added ${parsed.length} student(s) to ${target}`,'success');
+  rebuild();closeAddStudents();toast(`Added ${parsed.length} student(s) to ${target}`,'success');
   setTimeout(()=>{const b=[...document.querySelectorAll('.tab')].find(t=>t.textContent===target);if(b)showGroup(target,b);},100);
 }
 function deleteStudent(g,sn){
   if(!confirm('Remove this student?'))return;
-  groups[g]=groups[g].filter(s=>s.sn!==sn);saveData();rebuild();toast('Student removed.','info');
+  groups[g]=groups[g].filter(s=>s.sn!==sn);rebuild();toast('Student removed.','info');
   const b=[...document.querySelectorAll('.tab')].find(t=>t.textContent===g);if(b)showGroup(g,b);
 }
 
@@ -842,10 +730,10 @@ function rebuild(){buildTabs();buildAllView();buildSections();populateSelect();u
 function updateStats(){document.getElementById('total-count').textContent=Object.values(groups).flat().length;document.getElementById('group-count').textContent=Object.keys(groups).length;}
 function toast(msg,type='info'){const el=document.getElementById('toast');el.textContent=msg;el.className=`toast ${type} show`;clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),3500);}
 
-['login-modal','sheet-modal','add-modal','upload-modal'].forEach(id=>{
+['login-modal','add-modal','upload-modal'].forEach(id=>{
   document.getElementById(id).addEventListener('click',e=>{
     if(e.target!==e.currentTarget)return;
-    ({['login-modal']:closeLoginModal,['sheet-modal']:closeSheetModal,['add-modal']:closeAddStudents,['upload-modal']:closeUpload})[id]();
+    ({['login-modal']:closeLoginModal,['add-modal']:closeAddStudents,['upload-modal']:closeUpload})[id]();
   });
 });
 

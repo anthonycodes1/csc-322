@@ -5,13 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CSC 322 — Business Proposal Groups</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f5f6fa;
+    --bg: #f4f5f7;
     --white: #ffffff;
-    --surface: #ffffff;
-    --card: #ffffff;
     --border: #e2e5ec;
     --border-light: #f0f2f7;
     --accent: #2563eb;
@@ -22,231 +20,181 @@
     --red: #dc2626;
     --red-light: #fef2f2;
     --amber: #d97706;
+    --amber-light: #fffbeb;
     --text: #111827;
     --text-2: #374151;
     --muted: #6b7280;
     --subtle: #9ca3af;
-    --shadow-sm: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+    --shadow-sm: 0 1px 3px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.04);
     --shadow: 0 4px 6px -1px rgba(0,0,0,.07), 0 2px 4px -1px rgba(0,0,0,.04);
     --shadow-lg: 0 10px 25px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05);
   }
   * { margin:0; padding:0; box-sizing:border-box; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Inter', system-ui, sans-serif;
-    min-height: 100vh;
-    font-size: 14px;
-    line-height: 1.5;
-  }
+  body { background:var(--bg); color:var(--text); font-family:'DM Sans',system-ui,sans-serif; min-height:100vh; font-size:14px; line-height:1.5; }
 
-  /* HEADER */
-  header {
-    background: var(--white);
-    border-bottom: 1px solid var(--border);
-    padding: 0 2rem;
-    position: sticky; top: 0; z-index: 100;
-    box-shadow: var(--shadow-sm);
-  }
-  .header-inner {
-    max-width: 1300px; margin: 0 auto;
-    display: flex; align-items: center; justify-content: space-between;
-    height: 60px;
-  }
-  .logo { display: flex; align-items: center; gap: 10px; }
-  .logo-badge {
-    background: var(--accent);
-    color: #fff; font-size: 12px; font-weight: 700;
-    padding: 4px 10px; border-radius: 6px; letter-spacing: .04em;
-  }
-  .logo-title { font-size: 16px; font-weight: 600; color: var(--text); }
-  .header-actions { display: flex; gap: 8px; align-items: center; }
+  header { background:var(--white); border-bottom:1px solid var(--border); padding:0 2rem; position:sticky; top:0; z-index:100; box-shadow:var(--shadow-sm); }
+  .header-inner { max-width:1300px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; height:62px; gap:1rem; }
+  .logo { display:flex; align-items:center; gap:10px; flex-shrink:0; }
+  .logo-badge { background:var(--accent); color:#fff; font-size:11px; font-weight:700; padding:4px 10px; border-radius:6px; letter-spacing:.05em; }
+  .logo-title { font-size:15px; font-weight:600; color:var(--text); }
+  .header-actions { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
 
-  /* BUTTONS */
-  .btn {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 8px 14px; border-radius: 7px; font-family: inherit;
-    font-size: 13px; font-weight: 500; cursor: pointer;
-    border: 1px solid transparent; transition: all .15s; white-space: nowrap;
-  }
-  .btn-outline { background: var(--white); color: var(--text-2); border-color: var(--border); }
-  .btn-outline:hover { background: var(--bg); border-color: #c4c9d4; }
-  .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 1px 3px rgba(37,99,235,.3); }
-  .btn-primary:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
-  .btn-success { background: var(--green); color: #fff; border-color: var(--green); }
-  .btn-success:hover { background: #15803d; }
-  .btn-sm { padding: 5px 10px; font-size: 12px; }
-  .btn-icon { padding: 6px; border-radius: 6px; background: none; border: none; cursor: pointer; color: var(--subtle); transition: all .15s; font-size: 14px; }
-  .btn-icon:hover { background: var(--red-light); color: var(--red); }
+  .sync-pill { display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:500; padding:4px 10px; border-radius:999px; border:1px solid var(--border); background:var(--bg); color:var(--muted); white-space:nowrap; }
+  .sync-pill.synced { background:var(--green-light); border-color:#bbf7d0; color:var(--green); }
+  .sync-pill.syncing { background:var(--amber-light); border-color:#fcd34d; color:var(--amber); }
+  .sync-pill.error { background:var(--red-light); border-color:#fecaca; color:var(--red); }
+  .sync-dot { width:6px; height:6px; border-radius:50%; background:currentColor; flex-shrink:0; }
+  .sync-dot.pulse { animation:pulse 1.4s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
 
-  .admin-link {
-    font-size: 12px; color: var(--muted); cursor: pointer;
-    background: none; border: none; font-family: inherit;
-    padding: 6px 8px; border-radius: 6px; transition: all .15s;
-  }
-  .admin-link:hover { background: var(--bg); color: var(--accent); }
-  .admin-badge {
-    background: #fef3c7; color: #92400e;
-    border: 1px solid #fcd34d; border-radius: 5px;
-    font-size: 11px; font-weight: 600; padding: 3px 8px;
-  }
+  .btn { display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:7px; font-family:inherit; font-size:13px; font-weight:500; cursor:pointer; border:1px solid transparent; transition:all .15s; white-space:nowrap; }
+  .btn-outline { background:var(--white); color:var(--text-2); border-color:var(--border); }
+  .btn-outline:hover { background:var(--bg); border-color:#c4c9d4; }
+  .btn-primary { background:var(--accent); color:#fff; border-color:var(--accent); box-shadow:0 1px 3px rgba(37,99,235,.25); }
+  .btn-primary:hover { background:var(--accent-dark); }
+  .btn-success { background:var(--green); color:#fff; border-color:var(--green); }
+  .btn-success:hover { background:#15803d; }
+  .btn-warning { background:var(--amber); color:#fff; border-color:var(--amber); }
+  .btn-warning:hover { background:#b45309; }
+  .btn-sm { padding:5px 10px; font-size:12px; }
+  .btn-icon { padding:6px; border-radius:6px; background:none; border:none; cursor:pointer; color:var(--subtle); transition:all .15s; }
+  .btn-icon:hover { background:var(--red-light); color:var(--red); }
+  .admin-link { font-size:12px; color:var(--muted); cursor:pointer; background:none; border:none; font-family:inherit; padding:6px 8px; border-radius:6px; transition:all .15s; }
+  .admin-link:hover { background:var(--bg); color:var(--accent); }
+  .admin-badge { background:#fef3c7; color:#92400e; border:1px solid #fcd34d; border-radius:5px; font-size:11px; font-weight:600; padding:3px 8px; }
 
-  /* PAGE HEADER */
-  .page-header { background: var(--white); border-bottom: 1px solid var(--border); padding: 1.75rem 2rem; }
-  .page-header-inner { max-width: 1300px; margin: 0 auto; }
-  .page-header h1 { font-size: 1.5rem; font-weight: 700; color: var(--text); margin-bottom: 4px; }
-  .page-header p { color: var(--muted); font-size: 13px; }
-  .stats-row { display: flex; gap: 1rem; margin-top: 1.25rem; flex-wrap: wrap; }
-  .stat-card { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 16px; display: flex; flex-direction: column; gap: 2px; }
-  .stat-card .stat-val { font-size: 1.25rem; font-weight: 700; color: var(--accent); }
-  .stat-card .stat-lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+  .page-header { background:var(--white); border-bottom:1px solid var(--border); padding:1.5rem 2rem; }
+  .page-header-inner { max-width:1300px; margin:0 auto; }
+  .page-header h1 { font-size:1.4rem; font-weight:700; color:var(--text); margin-bottom:3px; }
+  .page-header p { color:var(--muted); font-size:13px; }
+  .stats-row { display:flex; gap:.75rem; margin-top:1.1rem; flex-wrap:wrap; }
+  .stat-card { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:10px 16px; display:flex; flex-direction:column; gap:2px; }
+  .stat-val { font-size:1.2rem; font-weight:700; color:var(--accent); }
+  .stat-lbl { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
 
-  /* SEARCH */
-  .search-container { max-width: 1300px; margin: 1.5rem auto; padding: 0 2rem; }
-  .search-input-wrap { position: relative; max-width: 420px; }
-  .search-input-wrap svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--subtle); }
-  .search-input-wrap input {
-    width: 100%; background: var(--white); border: 1px solid var(--border);
-    color: var(--text); font-family: inherit; font-size: 13px;
-    padding: 9px 12px 9px 36px; border-radius: 8px; outline: none;
-    box-shadow: var(--shadow-sm); transition: border-color .15s;
-  }
-  .search-input-wrap input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
-  .search-input-wrap input::placeholder { color: var(--subtle); }
+  .sheet-banner { max-width:1300px; margin:1.25rem auto 0; padding:0 2rem; }
+  .sheet-banner-inner { background:var(--white); border:1px solid var(--border); border-radius:10px; padding:14px 18px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .sheet-icon { font-size:22px; flex-shrink:0; }
+  .sheet-info { flex:1; min-width:160px; }
+  .sheet-info strong { font-size:13px; font-weight:600; color:var(--text); display:block; }
+  .sheet-info span { font-size:11px; color:var(--muted); font-family:'DM Mono',monospace; word-break:break-all; }
+  .sheet-actions { display:flex; gap:6px; flex-wrap:wrap; }
 
-  /* TABS */
-  .tabs-wrapper {
-    padding: 0 2rem;
-    background: var(--white);
-    border-bottom: 1px solid var(--border);
-    border-top: 1px solid var(--border);
-    overflow-x: auto; scrollbar-width: none;
-  }
-  .tabs-wrapper::-webkit-scrollbar { display: none; }
-  .tabs-inner { max-width: 1300px; margin: 0 auto; display: flex; }
-  .tabs { display: flex; }
-  .tab {
-    flex-shrink: 0; background: none; border: none;
-    color: var(--muted); font-family: inherit; font-size: 13px; font-weight: 500;
-    padding: 12px 16px; cursor: pointer; transition: all .15s;
-    border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap;
-  }
-  .tab:hover { color: var(--text-2); }
-  .tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+  .search-container { max-width:1300px; margin:1.25rem auto; padding:0 2rem; }
+  .search-input-wrap { position:relative; max-width:420px; }
+  .search-input-wrap svg { position:absolute; left:11px; top:50%; transform:translateY(-50%); color:var(--subtle); pointer-events:none; }
+  .search-input-wrap input { width:100%; background:var(--white); border:1px solid var(--border); color:var(--text); font-family:inherit; font-size:13px; padding:9px 12px 9px 36px; border-radius:8px; outline:none; box-shadow:var(--shadow-sm); transition:border-color .15s; }
+  .search-input-wrap input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(37,99,235,.1); }
+  .search-input-wrap input::placeholder { color:var(--subtle); }
 
-  /* MAIN */
-  main { max-width: 1300px; margin: 1.5rem auto; padding: 0 2rem 4rem; }
+  .tabs-wrapper { background:var(--white); border-bottom:1px solid var(--border); border-top:1px solid var(--border); padding:0 2rem; overflow-x:auto; scrollbar-width:none; }
+  .tabs-wrapper::-webkit-scrollbar { display:none; }
+  .tabs-inner { max-width:1300px; margin:0 auto; }
+  .tabs { display:flex; }
+  .tab { flex-shrink:0; background:none; border:none; color:var(--muted); font-family:inherit; font-size:13px; font-weight:500; padding:12px 16px; cursor:pointer; transition:all .15s; border-bottom:2px solid transparent; margin-bottom:-1px; white-space:nowrap; }
+  .tab:hover { color:var(--text-2); }
+  .tab.active { color:var(--accent); border-bottom-color:var(--accent); font-weight:600; }
 
-  /* ALL GROUPS GRID */
-  #all-view { display: none; }
-  #all-view.visible { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1rem; animation: fadeUp .25s ease; }
+  main { max-width:1300px; margin:1.25rem auto; padding:0 2rem 5rem; }
+  #all-view { display:none; }
+  #all-view.visible { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:1rem; animation:fadeUp .2s ease; }
+  .group-card { background:var(--white); border:1px solid var(--border); border-radius:10px; overflow:hidden; cursor:pointer; transition:all .15s; box-shadow:var(--shadow-sm); }
+  .group-card:hover { box-shadow:var(--shadow); border-color:#c4c9d4; transform:translateY(-1px); }
+  .group-card-header { padding:13px 15px; background:var(--bg); border-bottom:1px solid var(--border-light); display:flex; justify-content:space-between; align-items:center; }
+  .group-card-title { font-weight:700; font-size:13px; color:var(--text); }
+  .badge { font-size:11px; font-weight:600; padding:2px 8px; border-radius:999px; }
+  .badge-blue { background:var(--accent-light); color:var(--accent); }
+  .group-card-body { padding:11px 15px; }
+  .name-row { font-size:12px; color:var(--text-2); padding:3px 0; border-bottom:1px solid var(--border-light); }
+  .name-row:last-child { border-bottom:none; }
+  .more-link { font-size:12px; color:var(--accent); font-weight:500; margin-top:6px; }
 
-  .group-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; cursor: pointer; transition: all .15s; box-shadow: var(--shadow-sm); }
-  .group-card:hover { box-shadow: var(--shadow); border-color: #c4c9d4; transform: translateY(-1px); }
-  .group-card-header { padding: 14px 16px; background: var(--bg); border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; }
-  .group-card-title { font-weight: 700; font-size: 14px; color: var(--text); }
-  .badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; }
-  .badge-blue { background: var(--accent-light); color: var(--accent); }
-  .badge-green { background: var(--green-light); color: var(--green); }
-  .group-card-body { padding: 12px 16px; }
-  .name-row { font-size: 12px; color: var(--text-2); padding: 3px 0; border-bottom: 1px solid var(--border-light); }
-  .name-row:last-child { border-bottom: none; }
-  .more-link { font-size: 12px; color: var(--accent); font-weight: 500; margin-top: 8px; }
+  .group-section { display:none; }
+  .group-section.visible { display:block; animation:fadeUp .2s ease; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+  .section-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; flex-wrap:wrap; gap:.5rem; }
+  .section-title { font-size:1.05rem; font-weight:700; color:var(--text); }
 
-  /* GROUP SECTION */
-  .group-section { display: none; }
-  .group-section.visible { display: block; animation: fadeUp .25s ease; }
-  @keyframes fadeUp { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+  .table-card { background:var(--white); border:1px solid var(--border); border-radius:10px; overflow:hidden; box-shadow:var(--shadow-sm); }
+  table { width:100%; border-collapse:collapse; }
+  thead { background:var(--bg); }
+  thead th { padding:10px 16px; text-align:left; font-size:11px; font-weight:600; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--border); }
+  tbody tr { border-bottom:1px solid var(--border-light); transition:background .1s; }
+  tbody tr:last-child { border-bottom:none; }
+  tbody tr:hover { background:#fafbfc; }
+  tbody td { padding:11px 16px; font-size:13px; }
+  .td-sn { color:var(--subtle); font-size:12px; width:44px; }
+  .td-name { font-weight:500; color:var(--text); }
+  .td-matric { color:var(--muted); font-family:'DM Mono',monospace; font-size:12px; }
+  .td-actions { width:40px; text-align:right; }
+  .avatar { display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:50%; font-size:10px; font-weight:700; margin-right:8px; vertical-align:middle; flex-shrink:0; }
+  .new-tag { font-size:10px; font-weight:600; padding:1px 6px; border-radius:4px; background:var(--green-light); color:var(--green); margin-left:6px; vertical-align:middle; }
 
-  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: .5rem; }
-  .section-title { font-size: 1.1rem; font-weight: 700; color: var(--text); }
+  #search-results { display:none; }
+  #search-results.visible { display:block; }
 
-  /* TABLE */
-  .table-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; box-shadow: var(--shadow-sm); }
-  table { width: 100%; border-collapse: collapse; }
-  thead { background: var(--bg); }
-  thead th { padding: 11px 16px; text-align: left; font-size: 11px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); }
-  tbody tr { border-bottom: 1px solid var(--border-light); transition: background .1s; }
-  tbody tr:last-child { border-bottom: none; }
-  tbody tr:hover { background: #fafbfc; }
-  tbody td { padding: 12px 16px; font-size: 13px; }
-  .td-sn { color: var(--subtle); font-size: 12px; width: 44px; }
-  .td-name { font-weight: 500; color: var(--text); }
-  .td-matric { color: var(--muted); font-family: 'Courier New', monospace; font-size: 12px; }
-  .td-actions { width: 40px; text-align: right; }
-  .avatar { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 50%; font-size: 10px; font-weight: 700; margin-right: 8px; vertical-align: middle; flex-shrink: 0; background: var(--accent-light); color: var(--accent); }
-  .new-tag { font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 4px; background: var(--green-light); color: var(--green); margin-left: 6px; vertical-align: middle; }
+  .overlay { position:fixed; inset:0; background:rgba(17,24,39,.45); z-index:200; display:none; align-items:center; justify-content:center; padding:1rem; }
+  .overlay.open { display:flex; animation:fadeIn .15s ease; }
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+  .modal { background:var(--white); border:1px solid var(--border); border-radius:12px; width:100%; max-width:560px; max-height:92vh; overflow-y:auto; box-shadow:var(--shadow-lg); animation:slideUp .2s ease; }
+  .modal.modal-sm { max-width:400px; }
+  @keyframes slideUp { from{transform:translateY(12px);opacity:0} to{transform:translateY(0);opacity:1} }
+  .modal-head { padding:18px 22px 14px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+  .modal-head h2 { font-size:15px; font-weight:700; color:var(--text); }
+  .modal-close { background:none; border:none; color:var(--muted); font-size:20px; cursor:pointer; width:28px; height:28px; border-radius:6px; display:flex; align-items:center; justify-content:center; transition:all .15s; }
+  .modal-close:hover { background:var(--bg); color:var(--text); }
+  .modal-body { padding:18px 22px; }
+  .modal-foot { padding:12px 22px 18px; border-top:1px solid var(--border); display:flex; gap:8px; justify-content:flex-end; }
+  .form-group { margin-bottom:15px; }
+  label { display:block; font-size:12px; font-weight:600; color:var(--text-2); margin-bottom:5px; }
+  select,textarea,input[type="text"],input[type="password"],input[type="url"] { width:100%; background:var(--white); border:1px solid var(--border); color:var(--text); font-family:inherit; font-size:13px; padding:9px 12px; border-radius:8px; outline:none; transition:all .15s; }
+  select:focus,textarea:focus,input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(37,99,235,.1); }
+  textarea { resize:vertical; min-height:120px; line-height:1.6; }
+  .hint { font-size:11px; color:var(--muted); margin-top:4px; line-height:1.5; }
+  .error-msg { color:var(--red); font-size:12px; margin-top:6px; display:none; }
 
-  /* SEARCH RESULTS */
-  #search-results { display: none; }
-  #search-results.visible { display: block; }
+  .upload-zone { border:2px dashed var(--border); border-radius:10px; padding:2rem 1.5rem; text-align:center; cursor:pointer; transition:all .2s; background:var(--bg); }
+  .upload-zone:hover,.upload-zone.dragover { border-color:var(--accent); background:var(--accent-light); }
+  .upload-zone input[type="file"] { display:none; }
+  .upload-icon { font-size:2.2rem; margin-bottom:.6rem; display:block; }
+  .upload-zone h3 { font-size:13px; font-weight:600; color:var(--text-2); margin-bottom:3px; }
+  .upload-zone p { font-size:12px; color:var(--muted); }
+  .file-accepted { border-color:var(--green); background:var(--green-light); }
 
-  /* MODAL */
-  .overlay { position: fixed; inset: 0; background: rgba(17,24,39,.45); z-index: 200; display: none; align-items: center; justify-content: center; padding: 1rem; }
-  .overlay.open { display: flex; animation: fadeIn .15s ease; }
-  @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
-  .modal { background: var(--white); border: 1px solid var(--border); border-radius: 12px; width: 100%; max-width: 560px; max-height: 92vh; overflow-y: auto; box-shadow: var(--shadow-lg); animation: slideUp .2s ease; }
-  @keyframes slideUp { from { transform: translateY(12px); opacity:0; } to { transform: translateY(0); opacity:1; } }
-  .modal-head { padding: 20px 24px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-  .modal-head h2 { font-size: 15px; font-weight: 700; color: var(--text); }
-  .modal-close { background: none; border: none; color: var(--muted); font-size: 20px; cursor: pointer; width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; transition: all .15s; }
-  .modal-close:hover { background: var(--bg); color: var(--text); }
-  .modal-body { padding: 20px 24px; }
-  .modal-foot { padding: 14px 24px 20px; border-top: 1px solid var(--border); display: flex; gap: 8px; justify-content: flex-end; }
-  .form-group { margin-bottom: 16px; }
-  label { display: block; font-size: 12px; font-weight: 600; color: var(--text-2); margin-bottom: 5px; }
-  select, textarea, input[type="text"], input[type="password"] {
-    width: 100%; background: var(--white); border: 1px solid var(--border);
-    color: var(--text); font-family: inherit; font-size: 13px;
-    padding: 9px 12px; border-radius: 8px; outline: none; transition: all .15s;
-  }
-  select:focus, textarea:focus, input[type="text"]:focus, input[type="password"]:focus {
-    border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,.1);
-  }
-  textarea { resize: vertical; min-height: 130px; line-height: 1.6; }
-  .hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
-  .error-msg { color: var(--red); font-size: 12px; margin-top: 6px; display: none; }
+  .preview-box { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:11px 13px; margin-top:10px; max-height:160px; overflow-y:auto; }
+  .preview-row { font-size:12px; color:var(--text-2); padding:3px 0; }
+  .import-summary { background:var(--green-light); border:1px solid #bbf7d0; border-radius:8px; padding:12px 15px; margin-top:10px; font-size:13px; }
+  .import-summary strong { color:var(--green); }
 
-  /* UPLOAD ZONE */
-  .upload-zone { border: 2px dashed var(--border); border-radius: 10px; padding: 2.5rem 1.5rem; text-align: center; cursor: pointer; transition: all .2s; background: var(--bg); }
-  .upload-zone:hover, .upload-zone.dragover { border-color: var(--accent); background: var(--accent-light); }
-  .upload-zone input[type="file"] { display: none; }
-  .upload-icon { font-size: 2.5rem; margin-bottom: .75rem; display: block; }
-  .upload-zone h3 { font-size: 14px; font-weight: 600; color: var(--text-2); margin-bottom: 4px; }
-  .upload-zone p { font-size: 12px; color: var(--muted); }
-  .file-accepted { border-color: var(--green); background: var(--green-light); }
-  .file-accepted h3 { color: var(--green); }
+  .info-box { background:var(--accent-light); border:1px solid #bfdbfe; border-radius:8px; padding:12px 15px; font-size:12px; color:#1e40af; line-height:1.7; }
+  .info-box ol { margin-left:16px; margin-top:6px; }
+  .info-box li { margin-bottom:3px; }
+  .info-box code { background:rgba(37,99,235,.12); padding:1px 5px; border-radius:4px; font-family:'DM Mono',monospace; font-size:11px; }
 
-  /* PREVIEW BOX */
-  .preview-box { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; margin-top: 12px; max-height: 180px; overflow-y: auto; }
-  .preview-row { font-size: 12px; color: var(--text-2); padding: 3px 0; }
-  .preview-row b { color: var(--text); }
+  /* sheet format example table */
+  .format-table { width:100%; border-collapse:collapse; margin-top:10px; font-size:12px; }
+  .format-table th { background:var(--bg); padding:6px 10px; text-align:left; font-weight:600; color:var(--muted); border:1px solid var(--border); letter-spacing:.04em; text-transform:uppercase; font-size:10px; }
+  .format-table td { padding:6px 10px; border:1px solid var(--border); color:var(--text-2); font-family:'DM Mono',monospace; }
+  .format-table tr.group-row td { background:#fef9c3; font-weight:700; color:#92400e; font-family:'DM Sans',sans-serif; }
 
-  /* IMPORT SUMMARY */
-  .import-summary { background: var(--green-light); border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px 16px; margin-top: 12px; font-size: 13px; }
-  .import-summary strong { color: var(--green); }
-
-  /* TOAST */
-  .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--text); color: #fff; border-radius: 8px; padding: 12px 18px; font-size: 13px; font-weight: 500; box-shadow: var(--shadow-lg); z-index: 300; transform: translateY(16px); opacity: 0; transition: all .3s; display: flex; align-items: center; gap: 8px; max-width: 320px; }
-  .toast.show { transform: translateY(0); opacity: 1; }
-  .toast.success { background: var(--green); }
-  .toast.error { background: var(--red); }
-  .toast.info { background: var(--accent); }
+  .toast { position:fixed; bottom:1.5rem; right:1.5rem; background:var(--text); color:#fff; border-radius:8px; padding:11px 16px; font-size:13px; font-weight:500; box-shadow:var(--shadow-lg); z-index:300; transform:translateY(16px); opacity:0; transition:all .3s; max-width:320px; }
+  .toast.show { transform:translateY(0); opacity:1; }
+  .toast.success { background:var(--green); }
+  .toast.error { background:var(--red); }
+  .toast.info { background:var(--accent); }
+  .toast.warning { background:var(--amber); }
 
   @media(max-width:640px) {
-    .page-header { padding: 1.25rem 1rem; }
-    main { padding: 0 1rem 4rem; }
-    .tabs-wrapper { padding: 0 1rem; }
-    .search-container { padding: 0 1rem; }
-    td.td-matric { display: none; }
-    .stats-row { gap: .5rem; }
-    .logo-title { font-size: 13px; }
+    .page-header { padding:1.1rem 1rem; }
+    main { padding:0 1rem 4rem; }
+    .tabs-wrapper,.search-container,.sheet-banner { padding:0 1rem; }
+    td.td-matric { display:none; }
+    .logo-title { font-size:13px; }
   }
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
 <header>
   <div class="header-inner">
     <div class="logo">
@@ -254,48 +202,61 @@
       <span class="logo-title">Business Proposal Groups</span>
     </div>
     <div class="header-actions">
-      <!-- Admin controls (hidden until logged in) -->
-      <div id="admin-controls" style="display:none;gap:8px;align-items:center;">
+      <span class="sync-pill" id="sync-pill">
+        <span class="sync-dot" id="sync-dot"></span>
+        <span id="sync-label">No sheet linked</span>
+      </span>
+      <div id="admin-controls" style="display:none;gap:6px;align-items:center;">
         <span class="admin-badge">Admin</span>
-        <button class="btn btn-outline" onclick="openUpload()">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-          Update Spreadsheet
+        <button class="btn btn-outline btn-sm" onclick="openSheetModal()">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          Google Sheet
         </button>
-        <button class="btn btn-primary" onclick="openAddStudents()">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        <button class="btn btn-outline btn-sm" onclick="openUpload()">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+          Upload .xlsx
+        </button>
+        <button class="btn btn-primary btn-sm" onclick="openAddStudents()">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
           Add Students
         </button>
         <button class="btn btn-outline btn-sm" onclick="logoutAdmin()">Logout</button>
       </div>
-      <!-- Subtle admin login button for viewers -->
-      <button class="admin-link" id="admin-login-btn" onclick="openLoginModal()" title="Admin login">&#9881; Admin</button>
+      <button class="admin-link" id="admin-login-btn" onclick="openLoginModal()">&#9881; Admin</button>
     </div>
   </div>
 </header>
 
-<!-- PAGE HEADER -->
 <div class="page-header">
   <div class="page-header-inner">
-    <h1>Business Proposal &mdash; CSC 322</h1>
+    <h1>Class Register &mdash; CSC 322</h1>
     <p>Business Proposal Groups &middot; Academic Session 2023/2024</p>
     <div class="stats-row">
-      <div class="stat-card">
-        <span class="stat-val" id="total-count">&#8212;</span>
-        <span class="stat-lbl">Total Students</span>
-      </div>
-      <div class="stat-card">
-        <span class="stat-val" id="group-count">&#8212;</span>
-        <span class="stat-lbl">Groups</span>
-      </div>
-      <div class="stat-card">
-        <span class="stat-val">20</span>
-        <span class="stat-lbl">Per Group</span>
-      </div>
+      <div class="stat-card"><span class="stat-val" id="total-count">&#8212;</span><span class="stat-lbl">Total Students</span></div>
+      <div class="stat-card"><span class="stat-val" id="group-count">&#8212;</span><span class="stat-lbl">Groups</span></div>
+      <div class="stat-card"><span class="stat-val" id="last-sync">&#8212;</span><span class="stat-lbl">Last Synced</span></div>
     </div>
   </div>
 </div>
 
-<!-- SEARCH -->
+<div class="sheet-banner" id="sheet-banner" style="display:none;">
+  <div class="sheet-banner-inner">
+    <span class="sheet-icon">📗</span>
+    <div class="sheet-info">
+      <strong>Live Google Sheet Connected</strong>
+      <span id="sheet-url-display">—</span>
+    </div>
+    <div class="sheet-actions" id="sheet-banner-actions" style="display:none;">
+      <button class="btn btn-outline btn-sm" onclick="syncNow()">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+        Sync Now
+      </button>
+      <button class="btn btn-outline btn-sm" onclick="openSheetModal()">Edit</button>
+      <button class="btn btn-sm" style="color:var(--red);border-color:#fecaca;background:var(--red-light);" onclick="removeSheet()">Remove</button>
+    </div>
+  </div>
+</div>
+
 <div class="search-container">
   <div class="search-input-wrap">
     <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
@@ -303,7 +264,6 @@
   </div>
 </div>
 
-<!-- TABS -->
 <div class="tabs-wrapper">
   <div class="tabs-inner">
     <div class="tabs" id="tabs">
@@ -312,7 +272,6 @@
   </div>
 </div>
 
-<!-- MAIN CONTENT -->
 <main>
   <div id="all-view" class="visible"></div>
   <div id="search-results">
@@ -322,7 +281,7 @@
     </div>
     <div class="table-card">
       <table>
-        <thead><tr><th>#</th><th>Student Name</th><th>Matric No.</th><th>Group</th><th></th></tr></thead>
+        <thead><tr><th>#</th><th>Student Name</th><th>Matric No.</th><th>Group</th></tr></thead>
         <tbody id="search-tbody"></tbody>
       </table>
     </div>
@@ -330,11 +289,9 @@
   <div id="group-sections"></div>
 </main>
 
-<!-- ═══════════════════════════════════
-     ADMIN LOGIN MODAL
-═══════════════════════════════════ -->
+<!-- LOGIN MODAL -->
 <div class="overlay" id="login-modal">
-  <div class="modal" style="max-width:380px;">
+  <div class="modal modal-sm">
     <div class="modal-head">
       <h2>Admin Login</h2>
       <button class="modal-close" onclick="closeLoginModal()">&#215;</button>
@@ -342,21 +299,71 @@
     <div class="modal-body">
       <div class="form-group">
         <label>Password</label>
-        <input type="password" id="admin-password" placeholder="Enter admin password"
-               onkeydown="if(event.key==='Enter')doLogin()">
-        <p class="error-msg" id="login-error">Incorrect password. Try again.</p>
+        <input type="password" id="admin-password" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')doLogin()">
+        <p class="error-msg" id="login-error">Incorrect password.</p>
       </div>
     </div>
     <div class="modal-foot">
-      <button class="btn btn-outline" onclick="closeLoginModal()">Cancel</button>
-      <button class="btn btn-primary" onclick="doLogin()">Login</button>
+      <button class="btn btn-outline btn-sm" onclick="closeLoginModal()">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="doLogin()">Login</button>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════
-     ADD STUDENTS MODAL
-═══════════════════════════════════ -->
+<!-- GOOGLE SHEET MODAL -->
+<div class="overlay" id="sheet-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>Link Google Sheet</h2>
+      <button class="modal-close" onclick="closeSheetModal()">&#215;</button>
+    </div>
+    <div class="modal-body">
+      <div class="info-box" style="margin-bottom:16px;">
+        <strong>How to publish your Google Sheet:</strong>
+        <ol>
+          <li>Open your Google Sheet</li>
+          <li>Click <strong>File &rarr; Share &rarr; Publish to web</strong></li>
+          <li>Select your sheet tab, choose <strong>Comma-separated values (.csv)</strong></li>
+          <li>Click <strong>Publish</strong> &rarr; copy the URL</li>
+        </ol>
+        <div style="margin-top:10px;"><strong>Your sheet must follow this column layout:</strong></div>
+        <table class="format-table">
+          <thead><tr><th>Col A</th><th>Col B</th><th>Col C</th></tr></thead>
+          <tbody>
+            <tr class="group-row"><td colspan="3">GROUP 1 &nbsp;<em style="font-weight:400;opacity:.6">(in any column of the row)</em></td></tr>
+            <tr><td>1</td><td>STUDENT FULL NAME</td><td>20231363165</td></tr>
+            <tr><td>2</td><td>ANOTHER STUDENT</td><td>20231399832</td></tr>
+            <tr class="group-row"><td colspan="3">GROUP 2</td></tr>
+            <tr><td>21</td><td>NEXT GROUP STUDENT</td><td>20231367415</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="form-group">
+        <label>Published CSV URL</label>
+        <input type="url" id="sheet-url-input" placeholder="https://docs.google.com/spreadsheets/d/.../pub?output=csv">
+        <p class="hint">The sheet must be published publicly (no login required to view).</p>
+      </div>
+      <div class="form-group">
+        <label>Auto-sync interval</label>
+        <select id="sync-interval">
+          <option value="0">Manual only</option>
+          <option value="2">Every 2 minutes</option>
+          <option value="5" selected>Every 5 minutes</option>
+          <option value="10">Every 10 minutes</option>
+          <option value="30">Every 30 minutes</option>
+        </select>
+      </div>
+      <p class="error-msg" id="sheet-error"></p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline btn-sm" onclick="closeSheetModal()">Cancel</button>
+      <button class="btn btn-warning btn-sm" id="test-sheet-btn" onclick="testSheetUrl()">Test Connection</button>
+      <button class="btn btn-primary btn-sm" onclick="saveSheetUrl()">Save &amp; Sync</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD STUDENTS MODAL -->
 <div class="overlay" id="add-modal">
   <div class="modal">
     <div class="modal-head">
@@ -369,495 +376,476 @@
         <select id="admin-group"></select>
       </div>
       <div class="form-group">
-        <label>Create New Group <span style="font-weight:400;color:var(--muted)">(leave blank to use selection above)</span></label>
+        <label>Create New Group <span style="font-weight:400;color:var(--muted)">(leave blank to use above)</span></label>
         <input type="text" id="new-group-name" placeholder="e.g. GROUP 12">
       </div>
       <div class="form-group">
         <label>Paste Student Names &mdash; one per line</label>
-        <textarea id="admin-names" placeholder="JOHN DOE CHUKWU&#10;MARY JANE OBIORA&#10;PETER PAUL NWEKE, 20231363200&#10;&#10;Tip: Add matric after a comma or tab: NAME, MATRIC"></textarea>
-        <p class="hint">Names are automatically uppercased. Matric numbers are optional.</p>
+        <textarea id="admin-names" placeholder="JOHN DOE CHUKWU&#10;MARY JANE OBIORA&#10;PETER PAUL NWEKE, 20231363200"></textarea>
+        <p class="hint">Names auto-uppercased. Optionally add matric after a comma: NAME, MATRIC</p>
       </div>
       <div class="preview-box" id="preview-list" style="display:none;"></div>
       <button class="btn btn-outline btn-sm" style="margin-top:8px;" onclick="previewNames()">Preview names</button>
     </div>
     <div class="modal-foot">
-      <button class="btn btn-outline" onclick="closeAddStudents()">Cancel</button>
-      <button class="btn btn-primary" onclick="addStudents()">Add to Register</button>
+      <button class="btn btn-outline btn-sm" onclick="closeAddStudents()">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="addStudents()">Add to Register</button>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════
-     UPLOAD MODAL
-═══════════════════════════════════ -->
+<!-- UPLOAD MODAL -->
 <div class="overlay" id="upload-modal">
   <div class="modal">
     <div class="modal-head">
-      <h2>Update via Spreadsheet</h2>
+      <h2>Upload Spreadsheet (.xlsx)</h2>
       <button class="modal-close" onclick="closeUpload()">&#215;</button>
     </div>
     <div class="modal-body">
-      <p style="color:var(--muted);font-size:13px;margin-bottom:1.25rem;">
-        Upload your <strong style="color:var(--text)">.xlsx</strong> or <strong style="color:var(--text)">.xls</strong> file.
-        The website will read it directly and import all student groups automatically.
-      </p>
-      <div class="upload-zone" id="drop-zone"
-           onclick="document.getElementById('file-input').click()"
-           ondragover="handleDragOver(event)"
-           ondragleave="handleDragLeave(event)"
-           ondrop="handleDrop(event)">
+      <p style="color:var(--muted);font-size:13px;margin-bottom:1rem;">Upload your <strong style="color:var(--text)">.xlsx</strong> file directly. The site reads it the same way as your Google Sheet.</p>
+      <div class="upload-zone" id="drop-zone" onclick="document.getElementById('file-input').click()"
+           ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
         <input type="file" id="file-input" accept=".xlsx,.xls,.csv" onchange="handleFileSelect(event)">
-        <span class="upload-icon" id="upload-icon">&#128202;</span>
-        <h3 id="upload-title">Click to select file, or drag &amp; drop</h3>
+        <span class="upload-icon" id="upload-icon">📊</span>
+        <h3 id="upload-title">Click to select or drag &amp; drop</h3>
         <p id="upload-subtitle">Supports .xlsx, .xls files</p>
       </div>
       <div id="import-summary" style="display:none;"></div>
     </div>
     <div class="modal-foot">
-      <button class="btn btn-outline" onclick="closeUpload()">Cancel</button>
-      <button class="btn btn-success" id="import-btn" onclick="importXlsx()" style="display:none">Import All Data</button>
+      <button class="btn btn-outline btn-sm" onclick="closeUpload()">Cancel</button>
+      <button class="btn btn-success btn-sm" id="import-btn" onclick="importXlsx()" style="display:none">Import Data</button>
     </div>
   </div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
-// ════════════════════════════════════════════════════
-//  CONFIGURATION — change password here
-// ════════════════════════════════════════════════════
+// ══════════════════════════════════════════
+//  CONFIG
+// ══════════════════════════════════════════
 const ADMIN_PASSWORD = 'csc322admin';
 
-// ════════════════════════════════════════════════════
-//  SEED DATA
-// ════════════════════════════════════════════════════
+// ══════════════════════════════════════════
+//  SEED DATA (your exact sheet data)
+// ══════════════════════════════════════════
 const SEED_DATA = {"GROUP 1":[{"sn":"1","name":"OKONKWO CHIBUIKE JOEL","matric":"20231363165"},{"sn":"2","name":"OHUCHE DAVID KELECHI","matric":"20242485622"},{"sn":"3","name":"ISAAC-EZEMUOKA CHINENYEZE FORTU","matric":"20231394482"},{"sn":"4","name":"DIKE CHINEDU DAVID","matric":"20231399832"},{"sn":"5","name":"ODETADE JEFFREY TEMITAYO","matric":"20231380702"},{"sn":"6","name":"OKOLIE CHUKWUEMEKA JOSEPH","matric":"20231407712"},{"sn":"7","name":"IDIKA BLESSING UDUMA","matric":"20231367205"},{"sn":"8","name":"AGU CHUKWUEBUKA MICHEAL","matric":"20231368445"},{"sn":"9","name":"IHECHERE IFEANYI SOLOMON","matric":"20231374485"},{"sn":"10","name":"VAL-CHINAGI GOODNESS UCHECHI","matric":"20231363245"},{"sn":"11","name":"UDENENWU CHINONSO MICHAEL","matric":"20231364115"},{"sn":"12","name":"OGBONNA TREASURE CHINYERE","matric":"20231399562"},{"sn":"13","name":"ALAEFUNA CHUKWUEDOZIE CHUKWU","matric":"20231366615"},{"sn":"14","name":"NWAOZIRI IZUCHUKWU SOLOMON","matric":"20231375155"},{"sn":"15","name":"ONU HYACINTH CHIDUBEM","matric":"20231376975"},{"sn":"16","name":"UGBOBUAKU CHUKWUMA CHRISTIAN","matric":"20231380732"},{"sn":"17","name":"ALABILA MARK OJOCHOGWU","matric":"20231387692"},{"sn":"18","name":"HUMBLE WORTHY CHINEM","matric":"20231413812"},{"sn":"19","name":"UKACHI TOCHUKWU DANIEL","matric":"20231372145"},{"sn":"20","name":"ONWUKA UCHECHUKWU STANLEY","matric":"20231415122"}],"GROUP 2":[{"sn":"21","name":"MMEGWA UZONNA ANTHONY","matric":"20231367415"},{"sn":"22","name":"MMEREOLE CHINWE ANGELA","matric":"20231366515"},{"sn":"23","name":"CHUKWUEMEKA ANTHONY SOMTOCH","matric":"20231368075"},{"sn":"24","name":"ABONYI SOMTOCHUKWU VICTOR","matric":"20231395632"},{"sn":"25","name":"OGBAJI UGOCHUKWU PRECIOUS","matric":"20231410562"},{"sn":"26","name":"NNOLI CHIOMA NAOMI","matric":"20231372345"},{"sn":"27","name":"JONATHAN MIRACLE AMARACHI","matric":"20231373865"},{"sn":"28","name":"IBE PRECIOUS CHIMEZIE","matric":"20231368935"},{"sn":"29","name":"ABIAHU FORTUNE CHUKWUEBUKA","matric":"20231386102"},{"sn":"30","name":"ISREAL DIVINE UCHENNA","matric":"20231413092"},{"sn":"31","name":"OGBU PROMISE UCHA","matric":"20231388752"},{"sn":"32","name":"EBERE KANTOCHUKWU CHRISTIAN","matric":"20231412742"},{"sn":"33","name":"ODUMA JOSEPH CHINECHEREM","matric":"20231386442"},{"sn":"34","name":"OLIVER UCHECHUKWU ONYEDIKACHI","matric":"20231386542"},{"sn":"35","name":"NJOKU DANIEL CHIMEREUCHEYA","matric":"20231390952"},{"sn":"36","name":"POLLYSON DANIEL ONYENDIKACHI","matric":"20231394852"},{"sn":"37","name":"DIALACHUKWU DONATUS EZEUGO","matric":"20231366175"},{"sn":"38","name":"OKOLIE MAUREEN ECHEZONACHUKWU","matric":"20231398922"},{"sn":"39","name":"UZOMA JOSHUA CHUKWUEMEKA","matric":"20231415592"},{"sn":"40","name":"CHUKWU PROSPER CHINEMEREM","matric":"20231367895"}],"GROUP 3":[{"sn":"41","name":"IWUORIE SOMTO DAVID","matric":"20231383542"},{"sn":"42","name":"OKOLI UGONNA ALEXANDER","matric":"20231366965"},{"sn":"43","name":"ULU CHIKAMALA PETER","matric":"20231398972"},{"sn":"44","name":"IBE SOCHIMA ABUMCHI","matric":"20231380342"},{"sn":"45","name":"IHEAKA DICKSON EGWUONWU","matric":"20231402022"},{"sn":"46","name":"OKOYE KEVIN CHIBUEZE","matric":"20231374425"},{"sn":"47","name":"CHUKWUEMEKA NOBLE UCHENNAYA","matric":"20231369915"},{"sn":"48","name":"CHINE UDODI EXCEL OKWUCHUKWU","matric":"20231368005"},{"sn":"49","name":"CHINEKEZI DAVID CHIDIEBERE","matric":"20231383512"},{"sn":"50","name":"OBASI SAMUEL CHIDIEBERE","matric":"20231382762"},{"sn":"51","name":"DANIEL ABRAHAM AMARACHI","matric":"20231373795"},{"sn":"52","name":"UGWUZOR OLUEBUBE PRAISE","matric":"20231361995"},{"sn":"53","name":"OBIORA CHUKWUEMEKA CHINECHERE","matric":"20231394122"},{"sn":"54","name":"EKWEBELEM GABRIEL NNAMDI","matric":"20231365415"},{"sn":"55","name":"IWUNZE CHUKWUEBUKA MICHAEL","matric":"20231394922"},{"sn":"56","name":"NNOLUM FESTUS CHIDERA","matric":"20231386262"},{"sn":"57","name":"OKWUMUO ADANNA JACINTA","matric":"20231375455"},{"sn":"58","name":"ONUOHA VICTORY CHUKWUDALU","matric":"20231407372"},{"sn":"59","name":"AKUKWE EKENE SUCCESS","matric":"20231367105"},{"sn":"60","name":"OPENE CHUKWUDOZIE ISRAEL","matric":"20231388562"}],"GROUP 4":[{"sn":"61","name":"AHAMEFULA DESMOND UZOMA","matric":"20231389252"},{"sn":"62","name":"JEREMIAH OSINIGWE KESSINGTON","matric":"20231380952"},{"sn":"63","name":"OMEKEDO ELO GREAT","matric":"20231413572"},{"sn":"64","name":"EMEH DANIEL ONYEKACHI","matric":"20231388272"},{"sn":"65","name":"OHAEGBU IFEANYICHUKWU KINGSLEY","matric":"20231399182"},{"sn":"66","name":"LAZARUS FAVOUR TOCHUKWU","matric":"20231381402"},{"sn":"67","name":"ANI ALEXANDER EBUBECHUKWU","matric":"20231366315"},{"sn":"68","name":"MANAFA GERRARD CHINEDU","matric":"20231374105"},{"sn":"69","name":"CHIDEBERE WISDOM","matric":"20231364235"},{"sn":"70","name":"NWACHUKWU PRINCE CHIGOZIE","matric":"20231413892"},{"sn":"71","name":"AKINWALE VICTOR MAYOWA","matric":"20231392752"},{"sn":"72","name":"EVANS-DIKE PRINCE MUNACHIMSO","matric":"20231381422"},{"sn":"73","name":"IKENNA ELVIS MUNACHIMSO","matric":"20231397702"},{"sn":"74","name":"CHRISTIAN VICTORY CHIBUIKE","matric":"20231390672"},{"sn":"75","name":"ONWUDEBE OGUZIE KINGSLEY","matric":"20231362675"},{"sn":"76","name":"ALOZIE CHIBUEZE ONYINYECHI","matric":"20231364045"},{"sn":"77","name":"CHUKWUEMEKA SUCCESS CHINONSO","matric":"20231370145"},{"sn":"78","name":"EZE FERDINAND SOMTO","matric":"20231390252"},{"sn":"79","name":"ONYEJESI CHIEMEZIE MITCHELL","matric":"20231399512"},{"sn":"80","name":"IHEAKACHUKWU MERCY CHIFURUMNA","matric":"20231402992"}],"GROUP 5":[{"sn":"81","name":"EZEONYILIMBA DAVID CHIDERA","matric":"20231415192"},{"sn":"82","name":"OZOEJIKE CHINONSO STEPHEN","matric":"20231366975"},{"sn":"83","name":"HYACINTH CHUKWUBUIKEM JOEL","matric":"20231397482"},{"sn":"84","name":"COLLINS CHIDERA EBITE","matric":"20231374765"},{"sn":"85","name":"ESIABA CHARLES CHIBUIKE","matric":"20231407872"},{"sn":"86","name":"ONUOHA DANIEL CHIBUEZE","matric":"20231371335"},{"sn":"87","name":"AMOBI CINDY AMARACHI","matric":"20231368765"},{"sn":"88","name":"PATRICK KOSISOCHUKWU KELVIN","matric":"20231402782"},{"sn":"89","name":"OBIAGUNMADU FAITH UWAOMA","matric":"20231368845"},{"sn":"90","name":"AKADIEZE ERIC CHUKWUEMEKA","matric":"20231373095"},{"sn":"91","name":"EHIOGU CHINEMEREM JUSTICE","matric":"20231374255"},{"sn":"92","name":"UDOCHUKWU GREAT UDOCHUKWU","matric":"20231393392"},{"sn":"93","name":"NWARIEJI MICHAEL ONYEKACHI","matric":"20231378552"},{"sn":"94","name":"ODOEKWU MICHAEL EBUBECHUKWU","matric":"20231366145"},{"sn":"95","name":"OKPARA JOSEPH UCHENNA","matric":"20231361275"},{"sn":"96","name":"INNOCENT CHISOM JOEL","matric":"20231361585"},{"sn":"97","name":"ALOZIE GODWIN IFEANYI","matric":"20231378425"},{"sn":"98","name":"IHEDORO IFEANYICHUKWU DESMOND","matric":"20231367795"},{"sn":"99","name":"OMERUAH LILLIAN AKUOMA","matric":"20231364475"},{"sn":"100","name":"HILLARY CHUKWUMA PRINCE","matric":"20231361765"}],"GROUP 6":[{"sn":"101","name":"ADAMS EMMANUEL CHIDINMA","matric":"20231387092"},{"sn":"102","name":"ORIWOH GODWIN CHINECHEREM","matric":"20231392032"},{"sn":"103","name":"PEDRO DENNIS CHIKAMSO","matric":"20231384792"},{"sn":"104","name":"OKORO-ENYI REGINALD CHIDERA","matric":"20231371755"},{"sn":"105","name":"OKLIKA MICHAEL ADA-IJACHI OCHEME","matric":"20231384572"},{"sn":"106","name":"ALANEME CHUKWUEMEKA EMMANUEL","matric":"20231369145"},{"sn":"107","name":"OBI-NJOKU GEORGE JAACHIMIKE","matric":"20231361775"},{"sn":"108","name":"SAMSON CHIMARAOKE CHIZOR","matric":"20231385312"},{"sn":"109","name":"ONUOHA EBUBE EMMANUEL","matric":"20231404912"},{"sn":"110","name":"IWUOHA MARTINS IKECHUKWU","matric":"20231390212"},{"sn":"111","name":"ASIULOKA FAVOUR OZIOMA","matric":"20231362465"},{"sn":"112","name":"NNAMANI CHUKWUEBUKA CHRISTIAN","matric":"20231386002"},{"sn":"113","name":"OKOYE OLISA GODSPOWER","matric":"20231405812"},{"sn":"114","name":"AKUEGBU CHIDERA STANLEY","matric":"20231386882"},{"sn":"115","name":"NWADINOBI CHIGOZIE MARTINS","matric":"20231361615"},{"sn":"116","name":"KALU UDE CHIKA","matric":"20231368805"},{"sn":"117","name":"JIBULU CHINECHEREM FAVOUR","matric":"20231390852"},{"sn":"118","name":"CHINEKEZI VICTOR IKECHUKWU","matric":"20231394321"},{"sn":"119","name":"NWABUIFE EMMANUEL CHIMAOBI","matric":"20231371885"},{"sn":"120","name":"DOZIE CHIDIEBUBE CELESTINE","matric":"20231378815"}],"GROUP 7":[{"sn":"121","name":"OKOLI CHINONSO VICTOR","matric":"20231379782"},{"sn":"122","name":"AGUBATA CHISOM KINGSLEY","matric":"20231384372"},{"sn":"123","name":"OGUNDU EVEREST KOSISOCHUKWU","matric":"20231418602"},{"sn":"124","name":"ORUKWOWU GODSSON ONYEKWERE","matric":"20231383962"},{"sn":"125","name":"OFOEGBU CHIDIEBEUBE PRINCEWILLY","matric":"20231394532"},{"sn":"126","name":"ANUJURU FAVOUR CHIAGOZIEM","matric":"20231392092"},{"sn":"127","name":"OKAFOR CHINAZA RAPHAEL","matric":"20231368835"},{"sn":"128","name":"ONWE DAVID IFEANYICHUKWU","matric":"20231408162"},{"sn":"129","name":"ADINNU LOUIS CHUKWUEMEKA","matric":"20231404952"},{"sn":"130","name":"ONYEMAELU VALERI CHIOMA","matric":"20231393812"},{"sn":"131","name":"ANAEKE VALERIAN IFEANYI","matric":"20231402072"},{"sn":"132","name":"PRAISE CHIBUEZE CONFIDENCE","matric":"20242477972"},{"sn":"133","name":"UZOMA ONYEDIKACHI COLLINS","matric":"20231390132"},{"sn":"134","name":"NWOKEKE AUSTINE CHIEMERIE","matric":"20231365765"},{"sn":"135","name":"NNANNA GOODNESS NMA","matric":"20231369895"},{"sn":"136","name":"ABRAHAM EBUBE EMMANUEL","matric":"20231386092"},{"sn":"137","name":"ELEFUE DIVINE ONYINYECHI","matric":"20231372805"},{"sn":"138","name":"BRIGHT PRINCEWILL MUNACHIMSO","matric":"20231362805"},{"sn":"139","name":"ANDREW CHINONSO JEREMIAH","matric":"20232138175"},{"sn":"140","name":"AGBAI OBASI UWA","matric":"20231411752"}],"GROUP 8":[{"sn":"141","name":"CHUKWUEMEKA CHIDERA KENNEDY","matric":"20231414982"},{"sn":"142","name":"IHEJIETO NZUBECHUKWU DAVID","matric":"20231405642"},{"sn":"143","name":"NWACHUKWU OZIOMA CHUKWUNONY","matric":"20231393572"},{"sn":"144","name":"AZUBUIKE EBENEZER IFEANYI","matric":"20231404822"},{"sn":"145","name":"ISIEKWENE PATRICK EMEKA","matric":"20231392822"},{"sn":"146","name":"AHAOMA-DICK CHIAMAKA FAVOUR","matric":"20231369715"},{"sn":"147","name":"EJEGBU KENNETH CHIMAECHI","matric":"20231405682"},{"sn":"148","name":"ANYAOHA CHUKWUKA FESTUS","matric":"20231386272"},{"sn":"149","name":"MOSES MKPUME","matric":"20231406932"},{"sn":"150","name":"BALOGUN JOHN MUNACHIMSO","matric":"20231406612"},{"sn":"151","name":"MPAMUGO NDUBUISI NDUBUISI","matric":"20231375775"},{"sn":"152","name":"AMADI PETER CHIMEBUKA","matric":"20231393012"},{"sn":"153","name":"JOHN-ANORUO ONYEMAOBICHUKWU","matric":"20231417942"},{"sn":"154","name":"JOHN EMMANUEL NNANNA","matric":"20231371565"},{"sn":"155","name":"EZE DONALD KAMDICHUKWU","matric":"20231373595"},{"sn":"156","name":"AMOS PRAISE YABO","matric":"20231366555"},{"sn":"157","name":"IKECHUKWU STEPHEN OLUWATOBI","matric":"20231393612"},{"sn":"158","name":"AKAUBA BENEDICT CHIJIOKE","matric":"20231409522"},{"sn":"159","name":"GODFREY CHINAECHEREM PROSPER","matric":"20231381772"},{"sn":"160","name":"ELEKWA VALENTINE ASOR","matric":"20231370245"}],"GROUP 9":[{"sn":"161","name":"OHEMU DAVID PROMISE","matric":"20231401142"},{"sn":"162","name":"UKAEGBU KINGSLEY CHIDIEBERE","matric":"20231386772"},{"sn":"163","name":"OPARA SAVIOUR CHINONSO","matric":"20231396302"},{"sn":"164","name":"ONYEJI DELIGHT CHIDIEBUBE","matric":"20231380412"},{"sn":"165","name":"UMOH UBONG-ABASI NSIMA","matric":"20231398352"},{"sn":"166","name":"OZOEMENLA AZUBUIKE MICHAEL","matric":"20231367025"},{"sn":"167","name":"EZENU CHIEMERIE PRECIOUS","matric":"20242493672"},{"sn":"168","name":"ONYEAKAZI UGOCHUKWU EMMANUEL","matric":"20231374825"},{"sn":"169","name":"URUM-EKE EMEKA JOSHUA","matric":"20231399792"},{"sn":"170","name":"UGOCHUKWU ZERUBABBEL CHIGEMEZ","matric":"20231370295"},{"sn":"171","name":"AZUBUIKE KINGSLEY CHIBUIKEM","matric":"20231368345"},{"sn":"172","name":"NWAFOR OLUEBUBE THEOPHILUS","matric":"20231388092"},{"sn":"173","name":"OPARA CHIGOZIRIM VICTOR","matric":"20231402372"},{"sn":"174","name":"NNAJI LORDSON ONYEKACHI","matric":"20231402742"},{"sn":"175","name":"EZIMAKOR UCHEOMA DANIELLA","matric":"20231385222"},{"sn":"176","name":"KALU UKA CHIEMERIE MIRACLE","matric":"20231363215"},{"sn":"177","name":"IBE ANTHONY UGOCHUKWU","matric":"20231411772"},{"sn":"178","name":"OKORO WILLIAMS CHUKWUEMEKA","matric":"20231379575"},{"sn":"179","name":"NNAJI KELVIN EZENWA","matric":"20231399322"},{"sn":"180","name":"OBANI IKECHUKWU OZIOMA","matric":"20231368575"}],"GROUP 10":[{"sn":"181","name":"UZOMA HENRY CHUKWUEBUKA","matric":"20231361555"},{"sn":"182","name":"OHAGWU MARVEL CHIGOZIRIM","matric":"20231366125"},{"sn":"183","name":"MICHAEL CHIDERA SAMUEL","matric":"20231399772"},{"sn":"184","name":"CHIDEBE LAWRENCE NWABUFO","matric":"20231413452"},{"sn":"185","name":"JONATHAN VICTORY CHIDIEBERE","matric":"20231394172"},{"sn":"186","name":"CHIBUZOR JOHN CHIMARAOKE","matric":"20231363335"},{"sn":"187","name":"DURU BEDE CHINWEOTITO","matric":"20231387772"},{"sn":"188","name":"PATRICK SUCCESS IKECHUKWU","matric":"20231374845"},{"sn":"189","name":"ACHUGO OBINNA DAVIDMAT","matric":"20231377705"},{"sn":"190","name":"ANYANKA CHIAGOZIE DIVINE","matric":"20231404782"},{"sn":"191","name":"CHIKA WISDOM NNAEMEKA","matric":"20231399732"},{"sn":"192","name":"DIKE NNAMDI","matric":"20231386022"},{"sn":"193","name":"DURUCHUKWU CHIDIEBUBE DAMIAN","matric":"20231361735"},{"sn":"194","name":"EYO WISDOM ARCHIBONG","matric":"20231416782"},{"sn":"195","name":"IJERE SAVOUR TOCHUKWU","matric":"20231376775"},{"sn":"196","name":"INNOCENT GUZOROCHUKWU WINNER","matric":"20231409282"},{"sn":"197","name":"MARTINS DIVINE CHIDERA","matric":"20231369345"},{"sn":"198","name":"NZEANOCHIEH CHIMDIOGO CHIKEZIRI","matric":"20231396052"},{"sn":"199","name":"OKEOMA MAGNUS CHIBUEZE","matric":"20231379485"},{"sn":"200","name":"OKONKWO EMMANUELLA OLUCHI","matric":"20231383902"}],"GROUP 11":[{"sn":"201","name":"OPARAH MARTINS CHISOM","matric":"20231365335"}]};
 
-// ════════════════════════════════════════════════════
+// ══════════════════════════════════════════
 //  STATE
-// ════════════════════════════════════════════════════
+// ══════════════════════════════════════════
 let groups = {};
 let pendingImport = null;
 let isAdmin = false;
+let syncTimer = null;
+let sheetConfig = { url: '', interval: 5 };
 
-// ════════════════════════════════════════════════════
-//  AVATAR COLOURS
-// ════════════════════════════════════════════════════
 const avatarColors = [
   ['#eff6ff','#2563eb'],['#f0fdf4','#16a34a'],['#fff7ed','#d97706'],
   ['#fef2f2','#dc2626'],['#faf5ff','#7c3aed'],['#ecfeff','#0891b2'],
   ['#fdf2f8','#db2777'],['#f0fdfa','#0d9488'],['#fff8f1','#ea580c'],['#f7fee7','#65a30d']
 ];
-function avatarStyle(name) {
-  const i = (name.charCodeAt(0) || 0) % 10;
+function avatarStyle(n) {
+  const i = (n.charCodeAt(0)||0) % 10;
   return `background:${avatarColors[i][0]};color:${avatarColors[i][1]};`;
 }
 
-// ════════════════════════════════════════════════════
-//  STORAGE — localStorage with seed fallback
-// ════════════════════════════════════════════════════
+// ══════════════════════════════════════════
+//  STORAGE
+// ══════════════════════════════════════════
 function loadData() {
-  try {
-    const s = localStorage.getItem('csc322_bpg_v1');
-    if (s) { groups = JSON.parse(s); return; }
-  } catch(e) {}
-  // migrate old key if present
-  try {
-    const old = localStorage.getItem('csc322_v2');
-    if (old) { groups = JSON.parse(old); saveData(); return; }
-  } catch(e) {}
+  try { const c = localStorage.getItem('csc322_sheet_config'); if(c) sheetConfig = JSON.parse(c); } catch(e){}
+  try { const s = localStorage.getItem('csc322_bpg_v1'); if(s){ groups=JSON.parse(s); return; } } catch(e){}
   groups = JSON.parse(JSON.stringify(SEED_DATA));
   saveData();
 }
+function saveData() { try { localStorage.setItem('csc322_bpg_v1', JSON.stringify(groups)); } catch(e){} }
+function saveSheetConfig() { try { localStorage.setItem('csc322_sheet_config', JSON.stringify(sheetConfig)); } catch(e){} }
 
-function saveData() {
-  try { localStorage.setItem('csc322_bpg_v1', JSON.stringify(groups)); } catch(e) {}
+// ══════════════════════════════════════════
+//  SYNC STATUS
+// ══════════════════════════════════════════
+function setSyncStatus(state, label) {
+  document.getElementById('sync-pill').className = 'sync-pill ' + state;
+  document.getElementById('sync-dot').className = 'sync-dot' + (state==='syncing' ? ' pulse' : '');
+  document.getElementById('sync-label').textContent = label;
 }
-
-// ════════════════════════════════════════════════════
-//  ADMIN AUTH
-// ════════════════════════════════════════════════════
-function setAdminMode(on) {
-  isAdmin = on;
-  const ctrl = document.getElementById('admin-controls');
-  const loginBtn = document.getElementById('admin-login-btn');
-  ctrl.style.display = on ? 'flex' : 'none';
-  loginBtn.style.display = on ? 'none' : '';
-  rebuild();
+function updateLastSync() {
+  document.getElementById('last-sync').textContent = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
 }
 
-function openLoginModal() {
-  document.getElementById('login-modal').classList.add('open');
-  document.getElementById('admin-password').value = '';
-  document.getElementById('login-error').style.display = 'none';
-  setTimeout(() => document.getElementById('admin-password').focus(), 150);
+// ══════════════════════════════════════════
+//  SHEET PARSER — calibrated for your exact format:
+//  Group header: any cell in a row matches /GROUP\s*\d+/i
+//  Student row:  col[0]=number(sn), col[1]=name string, col[2]=number(matric)
+//  Works for BOTH CSV (from Google Sheets) and XLSX (SheetJS rows)
+// ══════════════════════════════════════════
+function parseSheetRows(rows) {
+  // rows = array of arrays, values already extracted
+  const result = {};
+  let cur = null;
+
+  rows.forEach(row => {
+    if (!row || row.every(v => v === null || v === undefined || String(v).trim() === '')) return;
+
+    // ── detect group header: any cell in the row matches GROUP N ──
+    const cells = row.map(v => String(v ?? '').trim());
+    const groupCell = cells.find(c => /^GROUP\s*\d+$/i.test(c));
+    if (groupCell) {
+      cur = groupCell.toUpperCase();
+      if (!result[cur]) result[cur] = [];
+      return;
+    }
+
+    if (!cur) return;
+
+    // ── detect student row ──
+    // Pattern A (your xlsx): col0=float sn, col1=name string, col2=float matric
+    // Pattern B (CSV may vary): col0=sn, col1=name, col2=matric  OR  col0=name (no sn)
+    let sn, name, matric;
+
+    const c0 = cells[0], c1 = cells[1] || '', c2 = cells[2] || '';
+
+    if (!isNaN(c0) && c0 !== '' && c1 && isNaN(c1)) {
+      // Standard: numeric sn, name in col1
+      sn    = String(Math.round(Number(c0)));
+      name  = c1;
+      matric = (!isNaN(c2) && c2 !== '') ? String(Math.round(Number(c2))) : c2;
+    } else if (c0 && isNaN(c0) && c0 !== '') {
+      // Name in col0 (no sn column)
+      sn    = String(result[cur].length + 1);
+      name  = c0;
+      matric = (!isNaN(c1) && c1 !== '') ? String(Math.round(Number(c1))) : c1;
+    } else {
+      return; // skip unrecognised rows (headers, blanks, etc.)
+    }
+
+    // Skip header-like rows
+    if (/^(s\/n|sn|no|#|name|student)/i.test(name)) return;
+
+    result[cur].push({ sn, name: name.toUpperCase().trim(), matric: matric || '' });
+  });
+
+  return Object.keys(result).length ? result : null;
 }
-function closeLoginModal() {
-  document.getElementById('login-modal').classList.remove('open');
+
+// ══════════════════════════════════════════
+//  CSV → rows  (handles quoted fields)
+// ══════════════════════════════════════════
+function csvToRows(csv) {
+  return csv.split('\n').map(line => {
+    const cols = []; let cur = '', inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === '"') { inQ = !inQ; }
+      else if (ch === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
+      else { cur += ch; }
+    }
+    cols.push(cur.trim());
+    return cols;
+  }).filter(r => r.some(c => c !== ''));
 }
-function doLogin() {
-  const pw = document.getElementById('admin-password').value;
-  if (pw === ADMIN_PASSWORD) {
-    closeLoginModal();
-    setAdminMode(true);
-    toast('Welcome, Admin!', 'success');
+
+// ══════════════════════════════════════════
+//  GOOGLE SHEET FETCH & SYNC
+// ══════════════════════════════════════════
+async function fetchSheet(url, silent=false) {
+  if (!url) return false;
+  if (!silent) setSyncStatus('syncing', 'Syncing…');
+
+  const proxy = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+  let csv = null;
+
+  for (const src of [proxy, url]) {
+    try {
+      const r = await fetch(src, { cache:'no-store' });
+      if (!r.ok) continue;
+      csv = await r.text();
+      break;
+    } catch(e) {}
+  }
+
+  if (!csv) {
+    setSyncStatus('error', 'Sync failed');
+    if (!silent) toast('Could not reach the Google Sheet. Check the URL.', 'error');
+    return false;
+  }
+
+  const parsed = parseSheetRows(csvToRows(csv));
+  if (!parsed) {
+    setSyncStatus('error', 'Parse failed');
+    if (!silent) toast('Fetched but no GROUP headers found. Check your sheet layout.', 'error');
+    return false;
+  }
+
+  groups = parsed;
+  saveData(); updateLastSync(); setSyncStatus('synced', 'Synced'); rebuild();
+  if (!silent) toast('Sheet synced — ' + Object.values(groups).flat().length + ' students loaded', 'success');
+  return true;
+}
+
+async function syncNow() {
+  if (!sheetConfig.url) { toast('No sheet linked yet.', 'warning'); return; }
+  await fetchSheet(sheetConfig.url, false);
+}
+
+function startAutoSync() {
+  if (syncTimer) clearInterval(syncTimer);
+  if (sheetConfig.interval > 0 && sheetConfig.url)
+    syncTimer = setInterval(() => fetchSheet(sheetConfig.url, true), sheetConfig.interval * 60000);
+}
+
+function updateSheetBanner() {
+  const banner = document.getElementById('sheet-banner');
+  const actions = document.getElementById('sheet-banner-actions');
+  if (sheetConfig.url) {
+    banner.style.display = '';
+    document.getElementById('sheet-url-display').textContent = sheetConfig.url;
+    actions.style.display = isAdmin ? 'flex' : 'none';
+    setSyncStatus('synced', 'Sheet linked');
   } else {
-    document.getElementById('login-error').style.display = 'block';
-    document.getElementById('admin-password').value = '';
-    document.getElementById('admin-password').focus();
+    banner.style.display = 'none';
+    setSyncStatus('', 'No sheet linked');
   }
 }
-function logoutAdmin() {
-  setAdminMode(false);
-  toast('Logged out.', 'info');
-}
 
-// ════════════════════════════════════════════════════
-//  INIT
-// ════════════════════════════════════════════════════
-function init() {
-  loadData();
-  buildTabs();
-  buildAllView();
-  buildSections();
-  populateSelect();
-  updateStats();
+// ══════════════════════════════════════════
+//  SHEET MODAL
+// ══════════════════════════════════════════
+function openSheetModal() {
+  document.getElementById('sheet-url-input').value = sheetConfig.url || '';
+  document.getElementById('sync-interval').value = String(sheetConfig.interval || 5);
+  document.getElementById('sheet-error').style.display = 'none';
+  document.getElementById('sheet-modal').classList.add('open');
 }
+function closeSheetModal() { document.getElementById('sheet-modal').classList.remove('open'); }
 
-// ════════════════════════════════════════════════════
-//  BUILD UI
-// ════════════════════════════════════════════════════
-function buildTabs() {
-  const tabs = document.getElementById('tabs');
-  tabs.innerHTML = '<button class="tab active" onclick="showAll(this)">All Groups</button>';
-  Object.keys(groups).forEach(g => {
-    const b = document.createElement('button');
-    b.className = 'tab'; b.textContent = g;
-    b.onclick = () => showGroup(g, b);
-    tabs.appendChild(b);
-  });
-}
+async function testSheetUrl() {
+  const url = document.getElementById('sheet-url-input').value.trim();
+  if (!url) { toast('Enter a URL first.', 'warning'); return; }
+  document.getElementById('sheet-error').style.display = 'none';
+  const btn = document.getElementById('test-sheet-btn');
+  btn.textContent = 'Testing…'; btn.disabled = true;
 
-function buildAllView() {
-  const el = document.getElementById('all-view');
-  el.innerHTML = Object.entries(groups).map(([g, students]) => {
-    const preview = students.slice(0, 5);
-    return `<div class="group-card" onclick="clickGroup('${g}')">
-      <div class="group-card-header">
-        <span class="group-card-title">${g}</span>
-        <span class="badge badge-blue">${students.length} students</span>
-      </div>
-      <div class="group-card-body">
-        ${preview.map(s => `<div class="name-row">${s.name}</div>`).join('')}
-        ${students.length > 5 ? `<div class="more-link">+${students.length - 5} more</div>` : ''}
-      </div>
-    </div>`;
-  }).join('');
-}
+  const proxy = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+  let csv = null;
+  for (const src of [proxy, url]) {
+    try { const r = await fetch(src,{cache:'no-store'}); if(r.ok){csv=await r.text();break;} } catch(e){}
+  }
 
-function buildSections() {
-  const el = document.getElementById('group-sections');
-  el.innerHTML = Object.entries(groups).map(([g, students]) => `
-    <div class="group-section" id="sec-${g.replace(/ /g, '_')}">
-      <div class="section-header">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <span class="section-title">${g}</span>
-          <span class="badge badge-blue">${students.length} students</span>
-        </div>
-      </div>
-      <div class="table-card">
-        <table>
-          <thead><tr><th>#</th><th>Student Name</th><th>Matric Number</th><th></th></tr></thead>
-          <tbody>${students.map(s => rowHtml(s, g)).join('')}</tbody>
-        </table>
-      </div>
-    </div>`).join('');
-}
-
-function rowHtml(s, group) {
-  const initials = s.name.split(' ').slice(0, 2).map(w => w[0] || '').join('');
-  const newTag = s.isNew ? `<span class="new-tag">NEW</span>` : '';
-  const deleteBtn = isAdmin
-    ? `<button class="btn-icon" title="Remove" onclick="deleteStudent('${group}','${s.sn}')">
-        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <polyline points="3 6 5 6 21 6"/>
-          <path d="M19 6l-1 14H6L5 6"/>
-          <path d="M10 11v6M14 11v6"/>
-          <path d="M9 6V4h6v2"/>
-        </svg>
-      </button>`
-    : '';
-  return `<tr>
-    <td class="td-sn">${s.sn}</td>
-    <td class="td-name">
-      <span class="avatar" style="${avatarStyle(s.name)}">${initials}</span>
-      ${s.name}${newTag}
-    </td>
-    <td class="td-matric">${s.matric || '&mdash;'}</td>
-    <td class="td-actions">${deleteBtn}</td>
-  </tr>`;
-}
-
-// ════════════════════════════════════════════════════
-//  NAVIGATION
-// ════════════════════════════════════════════════════
-function showAll(btn) {
-  setActiveTab(btn);
-  document.getElementById('all-view').classList.add('visible');
-  document.getElementById('search-results').classList.remove('visible');
-  document.querySelectorAll('.group-section').forEach(s => s.classList.remove('visible'));
-  document.getElementById('search-input').value = '';
-}
-function clickGroup(g) {
-  const btn = [...document.querySelectorAll('.tab')].find(t => t.textContent === g);
-  if (btn) showGroup(g, btn);
-}
-function showGroup(g, btn) {
-  setActiveTab(btn);
-  document.getElementById('all-view').classList.remove('visible');
-  document.getElementById('search-results').classList.remove('visible');
-  document.querySelectorAll('.group-section').forEach(s => s.classList.remove('visible'));
-  const sec = document.getElementById('sec-' + g.replace(/ /g, '_'));
-  if (sec) sec.classList.add('visible');
-  document.getElementById('search-input').value = '';
-}
-function setActiveTab(btn) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  btn.classList.add('active');
-}
-
-// ════════════════════════════════════════════════════
-//  SEARCH
-// ════════════════════════════════════════════════════
-function handleSearch(val) {
-  val = val.trim().toLowerCase();
-  if (!val) {
-    document.getElementById('search-results').classList.remove('visible');
-    const active = document.querySelector('.tab.active');
-    if (active && active.textContent === 'All Groups')
-      document.getElementById('all-view').classList.add('visible');
+  btn.textContent = 'Test Connection'; btn.disabled = false;
+  if (!csv) {
+    const el = document.getElementById('sheet-error');
+    el.style.display = 'block';
+    el.textContent = 'Could not fetch the URL. Make sure the sheet is published publicly (File → Share → Publish to web).';
     return;
   }
-  document.getElementById('all-view').classList.remove('visible');
-  document.querySelectorAll('.group-section').forEach(s => s.classList.remove('visible'));
-
-  const results = [];
-  Object.entries(groups).forEach(([g, students]) => {
-    students.forEach(s => {
-      if (s.name.toLowerCase().includes(val) || s.matric.includes(val))
-        results.push({ ...s, group: g });
-    });
-  });
-
-  const tbody = document.getElementById('search-tbody');
-  tbody.innerHTML = results.length
-    ? results.map(s => {
-        const initials = s.name.split(' ').slice(0, 2).map(w => w[0] || '').join('');
-        return `<tr>
-          <td class="td-sn">${s.sn}</td>
-          <td class="td-name"><span class="avatar" style="${avatarStyle(s.name)}">${initials}</span>${s.name}</td>
-          <td class="td-matric">${s.matric || '&mdash;'}</td>
-          <td><span class="badge badge-blue">${s.group}</span></td>
-        </tr>`;
-      }).join('')
-    : `<tr><td colspan="4" style="text-align:center;padding:2.5rem;color:var(--muted);">No students found.</td></tr>`;
-
-  document.getElementById('search-count').textContent = results.length + ' found';
-  document.getElementById('search-results').classList.add('visible');
+  const parsed = parseSheetRows(csvToRows(csv));
+  if (parsed) {
+    toast('✅ Connected — ' + Object.keys(parsed).length + ' groups, ' + Object.values(parsed).flat().length + ' students detected', 'success');
+  } else {
+    const el = document.getElementById('sheet-error');
+    el.style.display = 'block';
+    el.textContent = 'Connected but no GROUP headers found. Make sure rows contain "GROUP 1", "GROUP 2", etc. as a cell value.';
+  }
 }
 
-// ════════════════════════════════════════════════════
-//  ADD STUDENTS
-// ════════════════════════════════════════════════════
-function openAddStudents() {
-  populateSelect();
-  document.getElementById('add-modal').classList.add('open');
-}
-function closeAddStudents() {
-  document.getElementById('add-modal').classList.remove('open');
-  document.getElementById('admin-names').value = '';
-  document.getElementById('new-group-name').value = '';
-  document.getElementById('preview-list').style.display = 'none';
-}
-function populateSelect() {
-  document.getElementById('admin-group').innerHTML =
-    Object.keys(groups).map(g => `<option value="${g}">${g} (${groups[g].length})</option>`).join('');
-}
-function parseNames(raw) {
-  return raw.split('\n').map(l => l.trim()).filter(Boolean).map(line => {
-    const parts = line.split(/[\t,]/).map(p => p.trim());
-    if (parts.length >= 2 && /^\d{8,}$/.test(parts[parts.length - 1]))
-      return { name: parts.slice(0, -1).join(' ').toUpperCase(), matric: parts[parts.length - 1] };
-    return { name: line.toUpperCase(), matric: '' };
-  });
-}
-function previewNames() {
-  const raw = document.getElementById('admin-names').value.trim();
-  if (!raw) return;
-  const parsed = parseNames(raw);
-  const pl = document.getElementById('preview-list');
-  pl.style.display = 'block';
-  pl.innerHTML =
-    `<div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;">${parsed.length} name(s) detected</div>` +
-    parsed.map((p, i) => `<div class="preview-row"><b>${i + 1}.</b> ${p.name}${p.matric ? ' &middot; <span style="color:var(--muted)">' + p.matric + '</span>' : ''}</div>`).join('');
-}
-function addStudents() {
-  const raw = document.getElementById('admin-names').value.trim();
-  if (!raw) { toast('Please enter at least one name.', 'error'); return; }
-  const target =
-    document.getElementById('new-group-name').value.trim().toUpperCase() ||
-    document.getElementById('admin-group').value;
-  if (!groups[target]) groups[target] = [];
-  const parsed = parseNames(raw);
-  let maxSn = Object.values(groups).flat().reduce((m, s) => Math.max(m, parseInt(s.sn) || 0), 0);
-  parsed.forEach(p => { maxSn++; groups[target].push({ sn: String(maxSn), name: p.name, matric: p.matric, isNew: true }); });
-  saveData(); rebuild(); closeAddStudents();
-  toast(`Added ${parsed.length} student(s) to ${target}`, 'success');
-  setTimeout(() => {
-    const b = [...document.querySelectorAll('.tab')].find(t => t.textContent === target);
-    if (b) showGroup(target, b);
-  }, 100);
+async function saveSheetUrl() {
+  const url = document.getElementById('sheet-url-input').value.trim();
+  if (!url) { toast('Enter a URL.', 'warning'); return; }
+  sheetConfig.url = url;
+  sheetConfig.interval = parseInt(document.getElementById('sync-interval').value) || 0;
+  saveSheetConfig(); closeSheetModal(); updateSheetBanner(); startAutoSync();
+  await fetchSheet(url, false);
 }
 
-// ════════════════════════════════════════════════════
-//  DELETE
-// ════════════════════════════════════════════════════
-function deleteStudent(group, sn) {
-  if (!confirm('Remove this student from the register?')) return;
-  groups[group] = groups[group].filter(s => s.sn !== sn);
-  saveData(); rebuild();
-  toast('Student removed.', 'info');
-  const b = [...document.querySelectorAll('.tab')].find(t => t.textContent === group);
-  if (b) showGroup(group, b);
+function removeSheet() {
+  if (!confirm('Remove the linked sheet? Current data stays, auto-sync stops.')) return;
+  sheetConfig.url = ''; sheetConfig.interval = 5;
+  saveSheetConfig();
+  if (syncTimer) { clearInterval(syncTimer); syncTimer = null; }
+  updateSheetBanner();
+  toast('Sheet removed.', 'info');
 }
 
-// ════════════════════════════════════════════════════
-//  UPLOAD / XLSX
-// ════════════════════════════════════════════════════
-function openUpload() {
-  document.getElementById('upload-modal').classList.add('open');
-  resetUploadUI();
-}
-function closeUpload() {
-  document.getElementById('upload-modal').classList.remove('open');
-  pendingImport = null;
-}
+// ══════════════════════════════════════════
+//  XLSX UPLOAD  (uses same parser)
+// ══════════════════════════════════════════
+function openUpload() { document.getElementById('upload-modal').classList.add('open'); resetUploadUI(); }
+function closeUpload() { document.getElementById('upload-modal').classList.remove('open'); pendingImport = null; }
 function resetUploadUI() {
-  document.getElementById('upload-icon').textContent = '📊';
-  document.getElementById('upload-title').textContent = 'Click to select file, or drag & drop';
-  document.getElementById('upload-subtitle').textContent = 'Supports .xlsx, .xls files';
-  document.getElementById('drop-zone').className = 'upload-zone';
-  document.getElementById('import-summary').style.display = 'none';
-  document.getElementById('import-btn').style.display = 'none';
-  document.getElementById('file-input').value = '';
+  document.getElementById('upload-icon').textContent='📊';
+  document.getElementById('upload-title').textContent='Click to select or drag & drop';
+  document.getElementById('upload-subtitle').textContent='Supports .xlsx, .xls files';
+  document.getElementById('drop-zone').className='upload-zone';
+  document.getElementById('import-summary').style.display='none';
+  document.getElementById('import-btn').style.display='none';
+  document.getElementById('file-input').value='';
   pendingImport = null;
 }
-function handleDragOver(e) { e.preventDefault(); document.getElementById('drop-zone').classList.add('dragover'); }
-function handleDragLeave() { document.getElementById('drop-zone').classList.remove('dragover'); }
-function handleDrop(e) {
-  e.preventDefault();
-  document.getElementById('drop-zone').classList.remove('dragover');
-  const file = e.dataTransfer.files[0];
-  if (file) processFile(file);
-}
-function handleFileSelect(e) {
-  const file = e.target.files[0];
-  if (file) processFile(file);
-}
+function handleDragOver(e){e.preventDefault();document.getElementById('drop-zone').classList.add('dragover');}
+function handleDragLeave(){document.getElementById('drop-zone').classList.remove('dragover');}
+function handleDrop(e){e.preventDefault();document.getElementById('drop-zone').classList.remove('dragover');const f=e.dataTransfer.files[0];if(f)processFile(f);}
+function handleFileSelect(e){const f=e.target.files[0];if(f)processFile(f);}
+
 function processFile(file) {
   const ext = file.name.split('.').pop().toLowerCase();
-  if (!['xlsx', 'xls', 'csv'].includes(ext)) { toast('Please upload an .xlsx or .xls file.', 'error'); return; }
+  if (!['xlsx','xls','csv'].includes(ext)) { toast('Upload an .xlsx or .xls file.','error'); return; }
   const reader = new FileReader();
-  reader.onload = function(e) {
+  reader.onload = e => {
     try {
-      const data = new Uint8Array(e.target.result);
-      const wb = XLSX.read(data, { type: 'array' });
-      const sheet = wb.Sheets[wb.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
-      const parsed = parseXlsxRows(rows);
-      if (!parsed || !Object.keys(parsed).length) { toast('Could not detect any groups in this file.', 'error'); return; }
+      const wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
+      // Use sheet_to_json with header:1 to get raw rows as arrays
+      const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header:1, defval:''});
+      const parsed = parseSheetRows(rows);
+      if (!parsed || !Object.keys(parsed).length) { toast('No groups detected. Check column layout.','error'); return; }
       pendingImport = parsed;
       showImportSummary(file.name, parsed);
-    } catch(err) { toast('Error reading file: ' + err.message, 'error'); }
+    } catch(err) { toast('Error reading file: '+err.message,'error'); }
   };
   reader.readAsArrayBuffer(file);
 }
-function parseXlsxRows(rows) {
-  const result = {};
-  let currentGroup = null;
-  rows.forEach(row => {
-    const groupCell = row.find(c => /GROUP\s*\d+/i.test(String(c)));
-    if (groupCell) {
-      currentGroup = String(groupCell).toUpperCase().trim();
-      if (!result[currentGroup]) result[currentGroup] = [];
-      return;
-    }
-    if (!currentGroup) return;
-    const sn = row[0], name = row[1], matric = row[2];
-    if (name && typeof name === 'string' && name.trim() && isNaN(Number(name.trim()))) {
-      const matricStr = matric ? String(Math.round(Number(matric)) || matric) : '';
-      result[currentGroup].push({
-        sn: String(sn || result[currentGroup].length + 1),
-        name: String(name).toUpperCase().trim(),
-        matric: matricStr
-      });
-    }
-  });
-  return result;
-}
+
 function showImportSummary(filename, data) {
-  const totalStudents = Object.values(data).flat().length;
-  const groupList = Object.entries(data)
-    .map(([g, s]) => `<span style="margin-right:12px;color:var(--text-2)">${g}: <strong style="color:var(--green)">${s.length}</strong></span>`)
-    .join('');
-  document.getElementById('drop-zone').className = 'upload-zone file-accepted';
-  document.getElementById('upload-icon').textContent = '✅';
-  document.getElementById('upload-title').textContent = filename;
-  document.getElementById('upload-subtitle').textContent = `${Object.keys(data).length} groups · ${totalStudents} students detected`;
-  const summary = document.getElementById('import-summary');
-  summary.style.display = 'block';
-  summary.innerHTML = `<div class="import-summary">
-    <strong>Ready to import:</strong> ${Object.keys(data).length} groups, ${totalStudents} students<br>
-    <div style="margin-top:8px;font-size:12px;">${groupList}</div>
-    <p style="margin-top:8px;font-size:12px;color:var(--muted);">This will replace the current register. Any manually added students will be lost.</p>
-  </div>`;
-  document.getElementById('import-btn').style.display = 'block';
+  const total = Object.values(data).flat().length;
+  document.getElementById('drop-zone').className='upload-zone file-accepted';
+  document.getElementById('upload-icon').textContent='✅';
+  document.getElementById('upload-title').textContent=filename;
+  document.getElementById('upload-subtitle').textContent=Object.keys(data).length+' groups · '+total+' students';
+  const s=document.getElementById('import-summary');
+  s.style.display='block';
+  s.innerHTML=`<div class="import-summary"><strong>Ready to import:</strong> ${Object.keys(data).length} groups, ${total} students
+    <p style="margin-top:6px;font-size:12px;color:var(--muted);">This will replace the current register.</p></div>`;
+  document.getElementById('import-btn').style.display='block';
 }
 function importXlsx() {
   if (!pendingImport) return;
-  groups = pendingImport;
-  saveData(); rebuild(); closeUpload();
-  const total = Object.values(groups).flat().length;
-  toast(`Imported ${total} students across ${Object.keys(groups).length} groups`, 'success');
+  groups=pendingImport; saveData(); rebuild(); closeUpload();
+  toast('Imported '+Object.values(groups).flat().length+' students across '+Object.keys(groups).length+' groups','success');
 }
 
-// ════════════════════════════════════════════════════
-//  HELPERS
-// ════════════════════════════════════════════════════
-function rebuild() {
+// ══════════════════════════════════════════
+//  ADMIN AUTH
+// ══════════════════════════════════════════
+function setAdminMode(on) {
+  isAdmin=on;
+  document.getElementById('admin-controls').style.display=on?'flex':'none';
+  document.getElementById('admin-login-btn').style.display=on?'none':'';
+  updateSheetBanner(); rebuild();
+}
+function openLoginModal(){document.getElementById('login-modal').classList.add('open');document.getElementById('admin-password').value='';document.getElementById('login-error').style.display='none';setTimeout(()=>document.getElementById('admin-password').focus(),150);}
+function closeLoginModal(){document.getElementById('login-modal').classList.remove('open');}
+function doLogin(){
+  if(document.getElementById('admin-password').value===ADMIN_PASSWORD){closeLoginModal();setAdminMode(true);toast('Welcome, Admin!','success');}
+  else{document.getElementById('login-error').style.display='block';document.getElementById('admin-password').value='';document.getElementById('admin-password').focus();}
+}
+function logoutAdmin(){setAdminMode(false);toast('Logged out.','info');}
+
+// ══════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════
+function init() {
+  loadData();
   buildTabs(); buildAllView(); buildSections(); populateSelect(); updateStats();
-}
-function updateStats() {
-  document.getElementById('total-count').textContent = Object.values(groups).flat().length;
-  document.getElementById('group-count').textContent = Object.keys(groups).length;
+  updateSheetBanner();
+  if (sheetConfig.url) { fetchSheet(sheetConfig.url,false); startAutoSync(); }
 }
 
-function toast(msg, type = 'info') {
-  const el = document.getElementById('toast');
-  el.textContent = msg; el.className = `toast ${type} show`;
-  clearTimeout(el._t);
-  el._t = setTimeout(() => el.classList.remove('show'), 3500);
+// ══════════════════════════════════════════
+//  BUILD UI
+// ══════════════════════════════════════════
+function buildTabs(){
+  const t=document.getElementById('tabs');
+  t.innerHTML='<button class="tab active" onclick="showAll(this)">All Groups</button>';
+  Object.keys(groups).forEach(g=>{const b=document.createElement('button');b.className='tab';b.textContent=g;b.onclick=()=>showGroup(g,b);t.appendChild(b);});
+}
+function buildAllView(){
+  document.getElementById('all-view').innerHTML=Object.entries(groups).map(([g,ss])=>`
+    <div class="group-card" onclick="clickGroup('${g}')">
+      <div class="group-card-header"><span class="group-card-title">${g}</span><span class="badge badge-blue">${ss.length} students</span></div>
+      <div class="group-card-body">
+        ${ss.slice(0,5).map(s=>`<div class="name-row">${s.name}</div>`).join('')}
+        ${ss.length>5?`<div class="more-link">+${ss.length-5} more</div>`:''}
+      </div>
+    </div>`).join('');
+}
+function buildSections(){
+  document.getElementById('group-sections').innerHTML=Object.entries(groups).map(([g,ss])=>`
+    <div class="group-section" id="sec-${g.replace(/ /g,'_')}">
+      <div class="section-header">
+        <div style="display:flex;align-items:center;gap:10px;"><span class="section-title">${g}</span><span class="badge badge-blue">${ss.length} students</span></div>
+      </div>
+      <div class="table-card"><table>
+        <thead><tr><th>#</th><th>Student Name</th><th>Matric Number</th><th></th></tr></thead>
+        <tbody>${ss.map(s=>rowHtml(s,g)).join('')}</tbody>
+      </table></div>
+    </div>`).join('');
+}
+function rowHtml(s,g){
+  const ini=s.name.split(' ').slice(0,2).map(w=>w[0]||'').join('');
+  const newTag=s.isNew?`<span class="new-tag">NEW</span>`:'';
+  const del=isAdmin?`<button class="btn-icon" onclick="deleteStudent('${g}','${s.sn}')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>`:'';
+  return `<tr><td class="td-sn">${s.sn}</td><td class="td-name"><span class="avatar" style="${avatarStyle(s.name)}">${ini}</span>${s.name}${newTag}</td><td class="td-matric">${s.matric||'—'}</td><td class="td-actions">${del}</td></tr>`;
 }
 
-// Close overlays on backdrop click
-['login-modal', 'add-modal', 'upload-modal'].forEach(id => {
-  document.getElementById(id).addEventListener('click', e => {
-    if (e.target === e.currentTarget) {
-      if (id === 'login-modal') closeLoginModal();
-      else if (id === 'add-modal') closeAddStudents();
-      else closeUpload();
-    }
+// ══════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════
+function showAll(btn){setActiveTab(btn);document.getElementById('all-view').classList.add('visible');document.getElementById('search-results').classList.remove('visible');document.querySelectorAll('.group-section').forEach(s=>s.classList.remove('visible'));document.getElementById('search-input').value='';}
+function clickGroup(g){const b=[...document.querySelectorAll('.tab')].find(t=>t.textContent===g);if(b)showGroup(g,b);}
+function showGroup(g,btn){setActiveTab(btn);document.getElementById('all-view').classList.remove('visible');document.getElementById('search-results').classList.remove('visible');document.querySelectorAll('.group-section').forEach(s=>s.classList.remove('visible'));const sec=document.getElementById('sec-'+g.replace(/ /g,'_'));if(sec)sec.classList.add('visible');document.getElementById('search-input').value='';}
+function setActiveTab(btn){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');}
+
+// ══════════════════════════════════════════
+//  SEARCH
+// ══════════════════════════════════════════
+function handleSearch(val){
+  val=val.trim().toLowerCase();
+  if(!val){document.getElementById('search-results').classList.remove('visible');const a=document.querySelector('.tab.active');if(a&&a.textContent==='All Groups')document.getElementById('all-view').classList.add('visible');return;}
+  document.getElementById('all-view').classList.remove('visible');document.querySelectorAll('.group-section').forEach(s=>s.classList.remove('visible'));
+  const res=[];
+  Object.entries(groups).forEach(([g,ss])=>ss.forEach(s=>{if(s.name.toLowerCase().includes(val)||(s.matric||'').includes(val))res.push({...s,group:g});}));
+  document.getElementById('search-tbody').innerHTML=res.length?res.map(s=>{const ini=s.name.split(' ').slice(0,2).map(w=>w[0]||'').join('');return`<tr><td class="td-sn">${s.sn}</td><td class="td-name"><span class="avatar" style="${avatarStyle(s.name)}">${ini}</span>${s.name}</td><td class="td-matric">${s.matric||'—'}</td><td><span class="badge badge-blue">${s.group}</span></td></tr>`;}).join(''):`<tr><td colspan="4" style="text-align:center;padding:2.5rem;color:var(--muted);">No students found.</td></tr>`;
+  document.getElementById('search-count').textContent=res.length+' found';
+  document.getElementById('search-results').classList.add('visible');
+}
+
+// ══════════════════════════════════════════
+//  ADD / DELETE STUDENTS
+// ══════════════════════════════════════════
+function openAddStudents(){populateSelect();document.getElementById('add-modal').classList.add('open');}
+function closeAddStudents(){document.getElementById('add-modal').classList.remove('open');document.getElementById('admin-names').value='';document.getElementById('new-group-name').value='';document.getElementById('preview-list').style.display='none';}
+function populateSelect(){document.getElementById('admin-group').innerHTML=Object.keys(groups).map(g=>`<option value="${g}">${g} (${groups[g].length})</option>`).join('');}
+function parseNames(raw){return raw.split('\n').map(l=>l.trim()).filter(Boolean).map(line=>{const p=line.split(/[\t,]/).map(x=>x.trim());if(p.length>=2&&/^\d{8,}$/.test(p[p.length-1]))return{name:p.slice(0,-1).join(' ').toUpperCase(),matric:p[p.length-1]};return{name:line.toUpperCase(),matric:''};});}
+function previewNames(){const raw=document.getElementById('admin-names').value.trim();if(!raw)return;const p=parseNames(raw);const pl=document.getElementById('preview-list');pl.style.display='block';pl.innerHTML=`<div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:5px;">${p.length} name(s)</div>`+p.map((x,i)=>`<div class="preview-row"><b>${i+1}.</b> ${x.name}${x.matric?' · <span style="color:var(--muted)">'+x.matric+'</span>':''}</div>`).join('');}
+function addStudents(){
+  const raw=document.getElementById('admin-names').value.trim();
+  if(!raw){toast('Enter at least one name.','error');return;}
+  const target=document.getElementById('new-group-name').value.trim().toUpperCase()||document.getElementById('admin-group').value;
+  if(!groups[target])groups[target]=[];
+  const parsed=parseNames(raw);let maxSn=Object.values(groups).flat().reduce((m,s)=>Math.max(m,parseInt(s.sn)||0),0);
+  parsed.forEach(p=>{maxSn++;groups[target].push({sn:String(maxSn),name:p.name,matric:p.matric,isNew:true});});
+  saveData();rebuild();closeAddStudents();toast(`Added ${parsed.length} student(s) to ${target}`,'success');
+  setTimeout(()=>{const b=[...document.querySelectorAll('.tab')].find(t=>t.textContent===target);if(b)showGroup(target,b);},100);
+}
+function deleteStudent(g,sn){
+  if(!confirm('Remove this student?'))return;
+  groups[g]=groups[g].filter(s=>s.sn!==sn);saveData();rebuild();toast('Student removed.','info');
+  const b=[...document.querySelectorAll('.tab')].find(t=>t.textContent===g);if(b)showGroup(g,b);
+}
+
+// ══════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════
+function rebuild(){buildTabs();buildAllView();buildSections();populateSelect();updateStats();}
+function updateStats(){document.getElementById('total-count').textContent=Object.values(groups).flat().length;document.getElementById('group-count').textContent=Object.keys(groups).length;}
+function toast(msg,type='info'){const el=document.getElementById('toast');el.textContent=msg;el.className=`toast ${type} show`;clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),3500);}
+
+['login-modal','sheet-modal','add-modal','upload-modal'].forEach(id=>{
+  document.getElementById(id).addEventListener('click',e=>{
+    if(e.target!==e.currentTarget)return;
+    ({['login-modal']:closeLoginModal,['sheet-modal']:closeSheetModal,['add-modal']:closeAddStudents,['upload-modal']:closeUpload})[id]();
   });
 });
 
